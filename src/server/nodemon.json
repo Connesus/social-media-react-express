@@ -1,0 +1,8 @@
+{
+  "verbose": true,
+  "ignore": [],
+  "watch": ["src/**/*.ts"],
+  "execMap": {
+    "ts": "npm run build && npm run start"
+  }
+}
