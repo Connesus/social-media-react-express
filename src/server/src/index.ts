@@ -1,12 +1,10 @@
-import dotenv from 'dotenv';
 import express from 'express';
 import mongoose, { ConnectOptions } from 'mongoose';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import { userRoutes } from './routes/index.js';
+import { PORT, MONGO_URI, MONGO_PORT, SESS_LIFETIME, SESS_NAME, SESS_SECRET, NODE_ENV } from './utils/config.js'
 
-dotenv.config();
-const { PORT, MONGO_URI, MONGO_PORT, SESS_NAME, SESS_SECRET, SESS_LIFETIME } = process.env;
 const mongoUrl = `${MONGO_URI}${MONGO_PORT}`;
 
 (async () => {
