@@ -1,27 +1,28 @@
 import mongoose from "mongoose";
-const { model, Schema, Error } = mongoose;
+const { model, Schema } = mongoose;
 
-export interface User {
+export interface IUser {
     username: string;
     email: string;
     password: string;
+    id: string;
 }
 
-const schema = new Schema<User>({
+const schema = new Schema<IUser>({
     username: { type: String, required: true },
     password: { type: String, required: true },
     email: { type: String, required: true }
 })
 
-const UserModel = model<User>('User', schema);
+export const UserModel = model<IUser>('User', schema);
 
-interface partialUserFilter {
+interface IPartialUserFilter {
     username?: string;
     email?: string;
     password?: string;
 }
 
-const get = async (userData: partialUserFilter) => {
+const get = async (userData: IPartialUserFilter) => {
     const user = await UserModel.findOne(userData)
         .catch((error: Error) => {
             console.error(error);
@@ -30,7 +31,7 @@ const get = async (userData: partialUserFilter) => {
     return user;
 }
 
-const create = async (userData: User) => {
+const create = async (userData: IUser) => {
     return await UserModel.create(userData);
 }
 
