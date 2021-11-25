@@ -1,20 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-declare global {
-    namespace NodeJS {
-        export interface ProcessEnv {
-            NODE_ENV: "development" | "production" | "test";
-            PORT: string;
-            MONGO_URI: string;
-            MONGO_PORT: string;
-            SESS_NAME: string;
-            SESS_SECRET: string;
-            SESS_LIFETIME: string;
-        }
-    }
-}
-
 const {
     PORT = 8081,
     MONGO_URI = 'mongodb://localhost:',
