@@ -1,22 +1,21 @@
 import React from "react";
 import { RootState } from "./redux/store";
 import { useSelector, useDispatch } from "react-redux";
-import { decrement } from "./redux/slice/counter";
+import { getSessionData } from "./redux/slice/user";
 
 const user = {
-  email: "user@gmail.com",
-  password: "pass",
-  username: "user",
+  email: "sus@aboba.com",
+  password: "sus",
+  username: "sus",
 };
 
 const App: React.FC = () => {
-  const count = useSelector((state: RootState) => state.counter.value);
   const dispatch = useDispatch();
 
   return (
     <>
-      {count}
-      <button onClick={() => dispatch(decrement())}>Decrease</button>
+      {JSON.stringify(user)}
+      <button onClick={() => dispatch(getSessionData())}>Create user</button>
     </>
   );
 };
