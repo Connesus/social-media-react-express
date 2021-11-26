@@ -1,4 +1,4 @@
-import { IUser } from './../../../../../server/src/model/user';
+import { IUser } from '@backend/model/user';
 
 // Implementation code where T is the returned data shape
 function api<T>(url: string, options: RequestInit | undefined): Promise<T> {
@@ -12,7 +12,7 @@ function api<T>(url: string, options: RequestInit | undefined): Promise<T> {
 }
 
 export function requestCreateUser(newUser: IUser) {
-    return api<>('http://localhost:8081/api/user/', {
+    return api('http://localhost:8081/api/user/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newUser),

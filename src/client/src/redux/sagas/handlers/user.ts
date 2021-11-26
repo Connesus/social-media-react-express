@@ -1,4 +1,4 @@
-import { IUser } from './../../../../../server/src/model/user';
+import { IUser } from '@backend/model/user';
 import { call } from "@redux-saga/core/effects"
 import { requestCreateUser, requestLoginUser, requestLoginStatus } from "../requests/user";
 import { LoginDataT } from '../requests/user';
