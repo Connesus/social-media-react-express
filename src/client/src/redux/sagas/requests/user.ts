@@ -1,4 +1,5 @@
 import { IUser } from '@backend/model/user';
+import { SessionUserT } from '@backend/utils/helpers';
 
 // Implementation code where T is the returned data shape
 function api<T>(url: string, options: RequestInit | undefined): Promise<T> {
@@ -20,10 +21,10 @@ export function requestCreateUser(newUser: IUser) {
     })
 }
 
-export type LoginDataT = Omit<IUser, 'username'>
+export type LoginDataT = Omit<IUser, 'username' | 'id'>
 
 export function requestLoginUser(userData: LoginDataT) {
-    return fetch('http://localhost:8081/api/session/', {
+    return api<SessionUserT>('http://localhost:8081/api/session/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
@@ -32,7 +33,7 @@ export function requestLoginUser(userData: LoginDataT) {
 }
 
 export function requestLoginStatus() {
-    return fetch('http://localhost:8081/api/session/', {
+    return api<SessionUserT>('http://localhost:8081/api/session/', {
         method: 'GET',
         credentials: 'include'
     })
