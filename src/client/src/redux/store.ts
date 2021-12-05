@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-import counterReducer from './slice/counter'
+import userReducer from './slice/user'
 import createSagaMiddleware from 'redux-saga'
 import { watcherSaga } from './sagas/rootSaga'
 
@@ -8,10 +8,12 @@ const sagaMiddleware = createSagaMiddleware()
 
 export const store = configureStore({
     reducer: {
-        counter: counterReducer,
+        user: userReducer,
     },
-    middleware: [sagaMiddleware]
+    middleware: [sagaMiddleware],
+    devTools: true
 })
+
 
 sagaMiddleware.run(watcherSaga);
 
