@@ -46,8 +46,7 @@ const SessionController: { [key: string]: RequestHandler } = {
         }
     },
     check: (req, res) => {
-        res.send(req.session.user);
-        res.end();
+        res.json(req.session.user || ({}));
     },
 }
 
