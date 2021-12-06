@@ -1,20 +1,26 @@
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
 const { model, Schema } = mongoose;
 
-export interface IUser {
+export interface IUser extends Document {
     username: string;
     email: string;
     password: string;
-    id: string;
 }
 
-const schema = new Schema<IUser>({
-    username: { type: String, required: true },
+const userSchema = new Schema<IUser>({
+    username: { type: String, required: true, unique: true, index: true },
     password: { type: String, required: true },
-    email: { type: String, required: true }
+    email: { type: String, required: true, unique: true, index: true }
 })
 
-export const UserModel = model<IUser>('User', schema);
+export const UserModel = model<IUser>('User', userSchema);
+
+// @ts-ignore
+UserModel.collection.getIndexes().then(indexes => {
+    console.log("indexes:", indexes);
+    // ...
+}).catch(console.error);
+
 
 interface IPartialUserFilter {
     username?: string;
