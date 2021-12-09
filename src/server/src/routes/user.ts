@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import UserController from '../controller/user.js';
+import auth from '../utils/auth.js';
 
 const userRoutes = Router();
 
-userRoutes.get('/:username', UserController.get);
+userRoutes.get('/:username', auth.isAuthenticated, UserController.get);
 userRoutes.post('/', UserController.create)
 
 export default userRoutes;

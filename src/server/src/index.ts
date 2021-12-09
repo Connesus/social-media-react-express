@@ -4,6 +4,7 @@ import session from 'express-session';
 import MongoStore from 'connect-mongo';
 import { userRoutes, sessionRouter, seedRouter, postRouter } from './routes/index.js';
 import { PORT, MONGO_URI, MONGO_PORT, SESS_LIFETIME, SESS_NAME, SESS_SECRET, NODE_ENV } from './utils/config.js'
+import auth from './utils/auth.js';
 
 const mongoUrl = `${MONGO_URI}${MONGO_PORT}`;
 
@@ -43,7 +44,7 @@ const mongoUrl = `${MONGO_URI}${MONGO_PORT}`;
         apiRouter.use('/user', userRoutes);
         apiRouter.use('/session', sessionRouter);
         apiRouter.use('/seed', seedRouter)
-        apiRouter.use('/post', postRouter)
+        apiRouter.use('/post', auth.isAuthenticated, postRouter)
 
 
         app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
