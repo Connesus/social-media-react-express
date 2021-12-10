@@ -1,6 +1,6 @@
-import { IUser } from './user';
+import { LikeService, LikeModel, ILike } from './like.js';
 import mongoose, { Document, MongooseQueryOptions, FilterQuery } from "mongoose";
-import { UserModel } from "./user.js";
+import { UserModel, IUser } from "./user.js";
 
 const { model, Schema } = mongoose;
 
@@ -11,6 +11,7 @@ export interface IPost extends Document {
     text: String;
     img_url: String;
     replies: IPost['id'][];
+    likes: ILike['id'][]
 }
 
 const postSchema = new Schema<IPost>({
@@ -19,7 +20,8 @@ const postSchema = new Schema<IPost>({
     postedBy: { type: Schema.Types.ObjectId, required: true, ref: UserModel },
     text: String,
     img_url: String,
-    replies: [{ type: Schema.Types.ObjectId, ref: this }]
+    replies: [{ type: Schema.Types.ObjectId, ref: this }],
+    likes: [{ type: Schema.Types.ObjectId }]
 })
 
 export const Post = model<IPost>('Post', postSchema);
@@ -38,6 +40,21 @@ export class PostService {
         options: MongooseQueryOptions = { lean: true }
     ) {
 
+    }
+
+    static async likePost(postId: IPost['id'], userId: IUser['_id']) {
+        const prevLike = await LikeService.getByUserAndPostIds(userId, postId)
+
+        if (prevLike == null) {
+            console.log('add like');
+            const newLike = new LikeModel({ postId, userId })
+            await newLike.save();
+            await Post.findByIdAndUpdate(postId, { "$push": { 'likes': newLike.id } })
+        } else {
+            console.log('remove like');
+            await Post.findByIdAndUpdate(postId, { '$pull': { 'likes': prevLike.id } });
+            await prevLike.remove();
+        }
     }
 
     static async getPaginatedPosts({ keyId, limit = 10 }: getPaginatedPostsOptionsT) {
