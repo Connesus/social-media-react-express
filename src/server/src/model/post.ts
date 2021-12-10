@@ -6,6 +6,8 @@ const { model, Schema } = mongoose;
 
 export interface IPost extends Document {
     type: 'post' | 'repost' | 'reply'
+    repostOf?: IPost['id']
+    replyTo?: IPost['id']
     createdAt: Date;
     postedBy: IUser['id'];
     text: String;
@@ -16,6 +18,8 @@ export interface IPost extends Document {
 
 const postSchema = new Schema<IPost>({
     type: { type: String, required: true },
+    repostOf: Schema.Types.ObjectId,
+    replyTo: Schema.Types.ObjectId,
     createdAt: { type: Schema.Types.Date, required: true },
     postedBy: { type: Schema.Types.ObjectId, required: true, ref: UserModel },
     text: String,
@@ -40,6 +44,23 @@ export class PostService {
         options: MongooseQueryOptions = { lean: true }
     ) {
 
+    }
+
+    static async createPost({ type, postedBy, text, img_url, repostOf, replyTo }: {
+        type: IPost['type'],
+        postedBy: IPost['postedBy'],
+        text?: IPost['text'],
+        img_url?: IPost['img_url'],
+        repostOf?: IPost['repostOf'],
+        replyTo?: IPost['replyTo']
+    }) {
+        const newPost = new Post({ type, postedBy, text, img_url })
+        if (type === 'repost') {
+            newPost.repostOf = repostOf;
+        } else if (type === 'reply') {
+            newPost.replyTo = replyTo;
+        }
+        await newPost.save()
     }
 
     static async likePost(postId: IPost['id'], userId: IUser['_id']) {
