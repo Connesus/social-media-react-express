@@ -1,5 +1,5 @@
 import { LikeService, LikeModel, ILike } from './like.js';
-import mongoose, { Document, MongooseQueryOptions, FilterQuery } from "mongoose";
+import mongoose, { Document, MongooseQueryOptions, FilterQuery, ObjectId } from "mongoose";
 import { UserModel, IUser } from "./user.js";
 
 const { model, Schema } = mongoose;
@@ -61,6 +61,17 @@ export class PostService {
             newPost.replyTo = replyTo;
         }
         await newPost.save()
+    }
+
+    static async deletePost(postId: ObjectId, userId: ObjectId) {
+        const post = await Post.findById(postId);
+        if (post == null) return { status: 404, message: 'Couldn\'t delete post: post not found' }
+        if (post.postedBy == userId) {
+            await post.remove();
+            return { status: 200, message: 'Post deleted.' }
+        }
+        return { status: 403, message: 'You can delete only your posts.' }
+
     }
 
     static async likePost(postId: IPost['id'], userId: IUser['_id']) {
