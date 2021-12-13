@@ -5,6 +5,7 @@ services:
     build: ./src/server
     working_dir: /home/node/app
     command: "npm run dev"
+    # network_mode: bridge
     ports:
       - 8081:8081
     volumes:
@@ -32,3 +33,4 @@ services:
       - 27017:27017
     logging:
       driver: "none"
+    # network_mode: bridge
