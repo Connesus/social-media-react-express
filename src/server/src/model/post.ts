@@ -1,3 +1,4 @@
+import { IImage } from './image.js';
 import { LikeService, LikeModel, ILike } from './like.js';
 import mongoose, { Document, MongooseQueryOptions, FilterQuery, ObjectId } from "mongoose";
 import { UserModel, IUser } from "./user.js";
@@ -11,7 +12,7 @@ export interface IPost extends Document {
     createdAt: Date;
     postedBy: IUser['id'];
     text: String;
-    img_url: String;
+    imageId: IImage['id'];
     replies: IPost['id'][];
     likes: ILike['id'][]
 }
@@ -23,7 +24,7 @@ const postSchema = new Schema<IPost>({
     createdAt: { type: Schema.Types.Date, required: true },
     postedBy: { type: Schema.Types.ObjectId, required: true, ref: UserModel },
     text: String,
-    img_url: String,
+    imageId: Schema.Types.ObjectId,
     replies: [{ type: Schema.Types.ObjectId, ref: this }],
     likes: [{ type: Schema.Types.ObjectId }]
 })
@@ -46,15 +47,16 @@ export class PostService {
 
     }
 
-    static async createPost({ type, postedBy, text, img_url, repostOf, replyTo }: {
+    static async createPost({ type, createdAt, postedBy, text, imageId, repostOf, replyTo }: {
         type: IPost['type'],
         postedBy: IPost['postedBy'],
+        createdAt: IPost['createdAt'],
         text?: IPost['text'],
-        img_url?: IPost['img_url'],
+        imageId?: IPost['imageId'],
         repostOf?: IPost['repostOf'],
         replyTo?: IPost['replyTo']
     }) {
-        const newPost = new Post({ type, postedBy, text, img_url })
+        const newPost = new Post({ type, postedBy, text, imageId, createdAt })
         if (type === 'repost') {
             newPost.repostOf = repostOf;
         } else if (type === 'reply') {
