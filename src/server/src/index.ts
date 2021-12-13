@@ -2,7 +2,7 @@ import express from 'express';
 import mongoose, { ConnectOptions } from 'mongoose';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
-import { userRoutes, sessionRouter, seedRouter, postRouter } from './routes/index.js';
+import { userRoutes, sessionRouter, seedRouter, postRouter, staticRouter } from './routes/index.js';
 import { PORT, MONGO_URI, MONGO_PORT, SESS_LIFETIME, SESS_NAME, SESS_SECRET, NODE_ENV } from './utils/config.js'
 import auth from './utils/auth.js';
 
@@ -40,6 +40,7 @@ const mongoUrl = `${MONGO_URI}${MONGO_PORT}`;
         }))
 
         const apiRouter = express.Router();
+        app.use('/static', staticRouter)
         app.use('/api', apiRouter);
         apiRouter.use('/user', userRoutes);
         apiRouter.use('/session', sessionRouter);
