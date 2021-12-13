@@ -15,11 +15,6 @@ const userSchema = new Schema<IUser>({
 
 export const UserModel = model<IUser>('User', userSchema);
 
-// @ts-ignore
-UserModel.collection.getIndexes().then(indexes => {
-    console.log("indexes:", indexes);
-    // ...
-}).catch(console.error);
 
 
 interface IPartialUserFilter {
