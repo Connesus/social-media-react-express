@@ -3,3 +3,4 @@ node_modules
 dist
 mongodbdata
 .env
+.idea
