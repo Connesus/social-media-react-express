@@ -12,7 +12,9 @@ const postController: { [key: string]: RequestHandler } = {
         const nextPosts = await PostService.getPaginatedPosts({ keyId })
         res.json(nextPosts);
     },
-    getPost: async (req, res) => { },
+    getPost: async (req, res) => {
+        res.json(await PostService.findPostById(req.params.id));
+    },
     likePost: async (req, res) => {
         const { postId } = req.body;
         // PostService.likePost(req.session.user.id, postId);
