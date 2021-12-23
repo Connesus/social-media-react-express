@@ -33,6 +33,7 @@ ReactDOM.render(
           }
         />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
   </Provider>,
