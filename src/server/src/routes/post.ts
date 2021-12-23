@@ -7,6 +7,7 @@ const upload = multer({ storage })
 
 const postRouter = Router();
 
+postRouter.get('/:id', postController.getPost);
 postRouter.post('/page', postController.getPage);
 postRouter.post('/like', postController.likePost);
 postRouter.post('', upload.single('image'), postController.createPost);
