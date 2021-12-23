@@ -1,21 +1,23 @@
 import { IImage } from './image.js';
 import { LikeService, LikeModel, ILike } from './like.js';
-import mongoose, { Document, MongooseQueryOptions, FilterQuery, ObjectId } from "mongoose";
+import mongoose, { Document, MongooseQueryOptions, FilterQuery, ObjectId, DocumentDefinition } from "mongoose";
 import { UserModel, IUser } from "./user.js";
 
 const { model, Schema } = mongoose;
 
 export interface IPost extends Document {
     type: 'post' | 'repost' | 'reply'
-    repostOf?: IPost['id']
-    replyTo?: IPost['id']
+    repostOf?: IPost['_id']
+    replyTo?: IPost['_id']
     createdAt: Date;
-    postedBy: IUser['id'];
-    text: String;
-    imageId: IImage['id'];
-    replies: IPost['id'][];
-    likes: ILike['id'][]
+    postedBy: IUser['_id'];
+    text: string;
+    imageId: IImage['_id'];
+    replies: IPost['_id'][];
+    likes: ILike['_id'][]
 }
+
+export interface IPostDefinitions extends DocumentDefinition<IPost> { };
 
 const postSchema = new Schema<IPost>({
     type: { type: String, required: true },
@@ -45,6 +47,10 @@ export class PostService {
         options: MongooseQueryOptions = { lean: true }
     ) {
 
+    }
+
+    static async findPostById(id: IPost['_id']) {
+        return Post.findById(id);
     }
 
     static async createPost({ type, createdAt, postedBy, text, imageId, repostOf, replyTo }: {
