@@ -20,11 +20,10 @@ export const userSlice = createSlice({
     reducers: {
         loginUser: (state, action: PayloadAction<LoginDataT>) => { },
         createUser: (state, action) => { },
-        getSessionData: () => { },
+        getSessionData: (state, action: PayloadAction<undefined>) => { },
         setSessionData: (state, action: PayloadAction<SessionUserT>) => {
-            console.log(action)
-
-            return { ...state, ...action.payload }
+            state.id = action.payload.id;
+            state.username = action.payload.username;
         },
         setUsername: (state, action) => {
             console.log(action)
