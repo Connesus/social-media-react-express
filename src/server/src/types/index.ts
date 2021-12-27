@@ -1,11 +1,11 @@
-import { SessionUserT } from '../utils/helpers.ts'
-
 export { };
+
+export interface SessionUserT { id: string, username: string }
 
 // Session cookie declaration
 declare module 'express-session' {
     interface SessionData {
-        user: SessionUserT
+        userData: SessionUserT
     }
 }
 

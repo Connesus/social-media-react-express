@@ -1,6 +1,6 @@
 import { ImageModel } from '../model/image.js';
 import { RequestHandler, Request } from "express"
-import { PostService } from "../model/post.js";
+import {PostService} from "../service/post.js";
 
 interface createPostRequest extends Request {
     file: Express.Multer.File

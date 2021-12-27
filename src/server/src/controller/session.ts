@@ -1,27 +1,26 @@
 import { RequestHandler } from "express"
-import User from '../model/user.js'
 import { sessionizeUser } from '../utils/helpers.js';
 import { SESS_NAME } from '../utils/config.js'
+import {UserService} from "../service/user.js";
+import {ParamsDictionary} from "express-serve-static-core";
+import {UserLoginDataT} from "@shared/types";
 
-const SessionController: { [key: string]: RequestHandler } = {
+interface ISessionController {
+    [key: string]: RequestHandler;
+    login: RequestHandler<ParamsDictionary,any, UserLoginDataT>
+}
+
+const SessionController: ISessionController = {
     login: async (req, res, next) => {
         try {
-            console.log('vine boom sfx')
-            const { email, password } = req.body;
-            console.log(email, password)
+            const userData = await UserService.getUserLogin(req.body);
 
-            const user = await User.get({ email });
-
-            if (user instanceof Error) {
-                next(user);
-                console.log('error')
-            } else if (user && user.password === password) {
-                console.log('good')
-                const sessionUser = sessionizeUser(user);
-                req.session.user = sessionUser;
-                res.send(sessionUser);
+            if (userData instanceof Error) {throw userData}
+            else if (userData && userData.password) {
+                const sessionUser = sessionizeUser(userData)
+                req.session.userData = sessionUser;
+                res.json(sessionUser);
             } else {
-                console.log('error 2')
                 throw new Error('Invalid login credentials')
             }
         } catch (error) {
@@ -30,7 +29,7 @@ const SessionController: { [key: string]: RequestHandler } = {
     },
     logout: (req, res) => {
         try {
-            const user = req.session.user;
+            const user = req.session.userData;
             if (user) {
                 req.session.destroy(err => {
                     if (err) throw (err);
@@ -46,7 +45,7 @@ const SessionController: { [key: string]: RequestHandler } = {
         }
     },
     check: (req, res) => {
-        res.json(req.session.user || ({}));
+        res.json(req.session.userData || ({}));
     },
 }
 
