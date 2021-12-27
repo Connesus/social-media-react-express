@@ -2,15 +2,17 @@ services:
   # client:
   # server:
   server:
-    build: ./src/server
-    working_dir: /home/node/app
-    command: "npm run dev"
+    build:
+      dockerfile: ./server/Dockerfile
+      context: ./src
+    working_dir: /home/node/app/server
+#    command: "npm run build:watch"
     # network_mode: bridge
     ports:
       - 8081:8081
     volumes:
-      - ./src/server:/home/node/app
-      - /home/node/app/node_modules/
+      - ./src/server:/home/node/app/server
+      - /home/node/app/server/node_modules/
   # server:
   #   image: "node:alpine"
   #   user: "user"

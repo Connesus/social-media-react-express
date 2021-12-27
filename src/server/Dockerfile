@@ -1,8 +1,38 @@
+#FROM node:alpine
+#
+#WORKDIR /home/node/app/
+#
+#COPY ./package*.json ./server/
+#
+#WORKDIR /home/node/app/server
+#RUN npm install
+#
+#COPY src ./src
+##COPY ../shared ../shared
+#ADD ../shared ../shared
+
+
 FROM node:alpine
 
-WORKDIR /home/node/app
+RUN apk add --no-cache bash
+WORKDIR /home/node/app/server
+#RUN chown node:node ../
+#USER node
 
-COPY package*.json ./
-RUN npm install && npm cache clean --force
+COPY ./server/package*.json ./
+COPY ./server/tsconfig.json ./
+COPY ./server/src ./src
+COPY ./shared ../shared
 
-COPY ./src ./src
+#RUN npm i -g concurrently tsc tsc-alias
+RUN npm install npm@latest -g
+RUN npm ci
+#&& npm cache clean --force
+
+#COPY ./server ./
+
+
+#RUN chown -R node:node "/home/node/app/"
+RUN chown -R node:node "/root/.npm/"
+USER node
+CMD ["npm", "run", "dev"]
