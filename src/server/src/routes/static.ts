@@ -1,5 +1,5 @@
-import { ImageService } from '../model/image.js';
 import { Router } from 'express';
+import {ImageService} from "../service/image.js";
 const staticRouter = Router();
 
 staticRouter.get('/image/:id', async (req, res) => {

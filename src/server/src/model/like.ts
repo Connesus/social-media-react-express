@@ -16,9 +16,3 @@ const likeSchema = new Schema<ILike>({
 })
 
 export const LikeModel = model<ILike>('Like', likeSchema);
-
-export class LikeService {
-    static async getByUserAndPostIds(userId: ILike['userId'], postId: ILike['postId']) {
-        return await LikeModel.findOne({ userId, postId });
-    }
-}

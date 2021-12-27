@@ -1,8 +1,8 @@
-import mongoose, { Document } from "mongoose";
-const { Schema, model } = mongoose;
+import mongoose, {Document} from "mongoose";
+const { model, Schema } = mongoose;
 
 
-export interface IImage extends Document {
+export interface IImage extends Document{
     data: Buffer;
     type: string;
     name: string;
@@ -10,16 +10,9 @@ export interface IImage extends Document {
 
 
 const imageSchema = new Schema<IImage>({
-    data: { type: Schema.Types.Buffer, required: true },
+    data: { type: Buffer, required: true },
     type: { type: Schema.Types.String, required: true },
     name: { type: Schema.Types.String, required: true },
 })
 
 export const ImageModel = model<IImage>('Image', imageSchema);
-
-export class ImageService {
-    static async uploadOneImage() { }
-    static async getImageById(id: IImage['id']) {
-        return await ImageModel.findById(id);
-    }
-}
