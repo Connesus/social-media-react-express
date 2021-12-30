@@ -1,34 +1,35 @@
-import { IImage } from './image.js';
-import { ILike } from './like.js';
-import mongoose, { Document, DocumentDefinition } from "mongoose";
-import { UserModel, IUser } from "./user.js";
+import {IImage} from './image.js';
+import {ILike} from './like.js';
+import mongoose, {Document, DocumentDefinition, ObjectId} from "mongoose";
+import { IUser } from "./user.js";
 
 const { model, Schema } = mongoose;
 
 export interface IPost extends Document {
-    type: 'post' | 'repost' | 'reply'
+    author: IUser['_id']
+    createdAt: Date
+    text?: string
+    imageId?: IImage['_id']
+    replies?: IPost['_id'][]
+    likes?: ILike['_id'][]
+    reposts?: IPost['_id'][]
     repostOf?: IPost['_id']
     replyTo?: IPost['_id']
-    createdAt: Date;
-    postedBy: IUser['_id'];
-    text: string;
-    imageId: IImage['_id'];
-    replies: IPost['_id'][];
-    likes: ILike['_id'][]
 }
 
-export interface IPostDefinitions extends DocumentDefinition<IPost> { };
+export interface IPostLean extends DocumentDefinition<IPost> { }
 
 const postSchema = new Schema<IPost>({
-    type: { type: String, required: true },
-    repostOf: Schema.Types.ObjectId,
-    replyTo: Schema.Types.ObjectId,
-    createdAt: { type: Schema.Types.Date, required: true },
-    postedBy: { type: Schema.Types.ObjectId, required: true, ref: UserModel },
+    author: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
+    createdAt: { type: Schema.Types.Date, required: true, default: new Date() },
     text: String,
-    imageId: Schema.Types.ObjectId,
-    replies: [{ type: Schema.Types.ObjectId, ref: this }],
-    likes: [{ type: Schema.Types.ObjectId }]
+    repostOf: { type: Schema.Types.ObjectId, ref: 'Post' },
+    replyTo: { type: Schema.Types.ObjectId, ref: 'Post' },
+    imageId: { type: Schema.Types.ObjectId, ref: 'Image' },
+    replies: { type: [Schema.Types.ObjectId], ref: 'Post', default: undefined },
+    likes: { type: [Schema.Types.ObjectId], ref: 'Like', default: undefined },
+    reposts: { type: [Schema.Types.ObjectId], ref: 'Post', default: undefined }
 })
+
 
 export const Post = model<IPost>('Post', postSchema);
