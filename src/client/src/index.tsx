@@ -14,6 +14,8 @@ import {
 import { getSessionData } from "./redux/slice/user";
 import { Feed } from "./components/Feed";
 import {PostPage} from "./components/PostPage";
+import 'modern-normalize/modern-normalize.css';
+// import 'destyle.css'
 
 store.dispatch(getSessionData());
 
