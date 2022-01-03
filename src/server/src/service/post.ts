@@ -1,17 +1,47 @@
 import { LikeModel } from '../model/like.js';
-import mongoose, { Document, MongooseQueryOptions, FilterQuery, ObjectId, DocumentDefinition } from "mongoose";
-import { IUser } from "../model/user.js";
+import mongoose, {
+    Document,
+    MongooseQueryOptions,
+    FilterQuery,
+    ObjectId,
+    DocumentDefinition,
+    PipelineStage
+} from "mongoose";
+import {IUser, UserCollectionName} from "../model/user.js";
 import {IPost, Post} from "../model/post.js";
 import {LikeService} from "./like.js";
 
-const { model, Schema } = mongoose;
 
 type getPaginatedPostsOptionsT = {
     // query: FilterQuery<IPost>,
     // prevPosts?: IPost[] | Falsy,
     keyId: IPost['id'] | undefined
     limit?: number
+    userId?: IUser['_id']
 };
+
+const postSharedPipeline: (userId: IUser['_id']) => PipelineStage[] = (userId) => [{$addFields: {
+        "counter.likeCount": {$size:  {"$cond": [{ "$isArray": "$likes" },"$likes", []]}},
+        "counter.replyCount": {$size:  {"$cond": [{ "$isArray": "$replies" },"$replies", []]}},
+        "counter.repostCount": {$size:  {"$cond": [{ "$isArray": "$replies" },"$replies", []]}},
+        "user.hasLiked": {$in: [userId, {"$cond": [{ "$isArray": "$likes" },"$likes", []]}]},
+        "user.hasReposted": {$in: [userId, {"$cond": [{ "$isArray": "$reposts" },"$reposts", []]}]},
+        "contentType": {$switch: {
+                branches: [
+                    {case: {$and: ["$imageId",  "$text"]}, then: "mixed"},
+                    {case: {$and: ['$text', {$not: '$imageId'}]}, then: "text"},
+                    {case: {$and: ['$imageId', {$not:  '$text'}]}, then: "image"},
+                ],
+            }}
+    }},
+    {$lookup: {
+            from: UserCollectionName,
+            localField: 'author',
+            foreignField: '_id',
+            as: 'author'
+        }},
+    {$unwind: "$author"},
+    {$project: {likes: 0, replies: 0, __v: 0, "author.password": 0, "author.email": 0}}]
 
 export class PostService {
     async findPost(
@@ -21,32 +51,30 @@ export class PostService {
 
     }
 
-    static async findPostById(id: IPost['_id']) {
-        return Post.findById(id);
+    static async findPostById(id: IPost['_id'], userId?: string) {
+        return Post.aggregate([
+            {$match: {_id: new mongoose.Types.ObjectId(id)}},
+            ...postSharedPipeline(userId)
+        ])
     }
 
-    static async createPost({ type, createdAt, postedBy, text, imageId, repostOf, replyTo }: {
-        type: IPost['type'],
-        postedBy: IPost['postedBy'],
+    static async createPost({ createdAt, author, text, imageId, repostOf, replyTo }: {
+        author: IPost['author'],
         createdAt: IPost['createdAt'],
         text?: IPost['text'],
         imageId?: IPost['imageId'],
         repostOf?: IPost['repostOf'],
         replyTo?: IPost['replyTo']
     }) {
-        const newPost = new Post({ type, postedBy, text, imageId, createdAt })
-        if (type === 'repost') {
-            newPost.repostOf = repostOf;
-        } else if (type === 'reply') {
-            newPost.replyTo = replyTo;
-        }
+        console.log(imageId)
+        const newPost = new Post({ author, imageId, createdAt, text, repostOf, replyTo })
         await newPost.save()
     }
 
     static async deletePost(postId: ObjectId, userId: ObjectId) {
         const post = await Post.findById(postId);
         if (post == null) return { status: 404, message: 'Couldn\'t delete post: post not found' }
-        if (post.postedBy == userId) {
+        if (post.author == userId) {
             await post.remove();
             return { status: 200, message: 'Post deleted.' }
         }
@@ -69,10 +97,17 @@ export class PostService {
         }
     }
 
-    static async getPaginatedPosts({ keyId, limit = 10 }: getPaginatedPostsOptionsT) {
+    static async getPaginatedPosts({ keyId, limit = 10, userId }: getPaginatedPostsOptionsT) {
+        // const userId = '61b317f9ce91939d35c2c704';
         if (typeof keyId == 'undefined') {
             console.log('prevPosts undefined')
-            return Post.find({}).sort({_id: -1}).limit(limit);
+            // return Post.find({}).sort({_id: -1}).limit(limit).populate('postedBy')
+            return Post.aggregate([
+              {$match: {}},
+              {$sort: {_id: -1}},
+              {$limit: limit},
+              ...postSharedPipeline(userId)
+            ])
         }
 
         console.log('prevPosts')
