@@ -1,11 +1,9 @@
-import { IUser } from '@backend/model/user';
 import { call, put } from "@redux-saga/core/effects"
 import { requestCreateUser, requestLoginUser, requestLoginStatus } from "../requests/user";
-import { LoginDataT } from '../requests/user';
 import { PayloadAction } from '@reduxjs/toolkit';
 import { StrictEffect } from '@redux-saga/types';
 import { setSessionData, setLoginStatus } from '../../slice/user';
-import { SessionUserT } from '@backend/utils/helpers';
+import {IUser, SessionUserT, UserLoginDataT} from "@shared/types";
 
 export function* handleCreateUser(action: PayloadAction<IUser>): Generator<any> {
     try {
@@ -15,7 +13,7 @@ export function* handleCreateUser(action: PayloadAction<IUser>): Generator<any> 
     }
 }
 
-export function* handleLoginUser(action: PayloadAction<LoginDataT>): Generator<StrictEffect, void, SessionUserT> {
+export function* handleLoginUser(action: PayloadAction<UserLoginDataT>): Generator<StrictEffect, void, SessionUserT> {
     try {
         const data = yield call(requestLoginUser, action.payload);
         if (data) {
