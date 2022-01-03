@@ -1,6 +1,5 @@
 export { };
-
-export interface SessionUserT { id: string, username: string }
+import {SessionUserT} from "@shared/types";
 
 // Session cookie declaration
 declare module 'express-session' {
