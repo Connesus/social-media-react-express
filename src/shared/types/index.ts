@@ -1,15 +1,18 @@
 export interface IUser {
   id: string;
-  name: string;
-  imageID?: string;
+  username: string;
+  imageId?: string;
 }
 
 export interface IPost {
-  id: string;
+  _id: string;
   author: IUser;
-  userData: PostUserDataT;
+  user: PostUserDataT;
   counter: PostCounterT;
-  content: PostContentT;
+  text?: string;
+  imageId?: string;
+  contentType: "text" | "image" | 'mixed';
+  createdAt: Date;
 }
 
 export type PostUserDataT = {
@@ -46,3 +49,7 @@ export type UserLoginDataT = {
 // type PostContentTypes = keyof PostContentMap;
 
 
+export interface SessionUserT {
+  id: string,
+  username: string
+}
