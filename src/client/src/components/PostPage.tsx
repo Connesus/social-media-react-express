@@ -1,19 +1,22 @@
 import * as React from "react";
-import {Post, PostT} from "./Post";
 import {useParams} from "react-router-dom";
 import {useEffect} from "react";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
+import {Post} from "./Post";
+import {getPostById} from '../redux/slice/post'
+import {RootState} from "../redux/store.js";
 
 export const PostPage = () => {
   const {postId} = useParams();
   const dispatch = useDispatch();
-  let post: PostT;
+  const currentPost = useSelector((state: RootState) => state.post.currentPost)
 
   useEffect(() => {
-    // dispatch();
+    if (postId) {
+    dispatch(getPostById(postId));
+      }
     console.log(postId)
   }, [postId]);
 
-  return <>'In dev'</>
-  // return <Post  { ...post}/>
+  return <>{currentPost && <Post {...currentPost} />}</>
 }

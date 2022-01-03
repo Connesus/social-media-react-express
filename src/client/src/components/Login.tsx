@@ -4,23 +4,24 @@ import { loginUser } from "../redux/slice/user";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../redux/store";
+import {UserLoginDataT} from "@shared/types";
 
-const user = {
-  email: "sus@aboba.com",
+const user: UserLoginDataT = {
+  login: {type: 'email', email: "sus@aboba.com"},
   password: "sus",
-  //   username: "sus",
 };
 
 const LoginPage = () => {
   const dispatch = useDispatch();
   const handleLogin = () => dispatch(loginUser(user));
   const isLoggedIn = useSelector((state: RootState) => state.user.isLoggedIn);
-  const { state } = useLocation();
+  const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
+    const state = location.state as {pathname: string}
     if (isLoggedIn) {
-      navigate(state.pathname || "/");
+      navigate(state?.pathname || "/");
     }
   }, [isLoggedIn]);
 
