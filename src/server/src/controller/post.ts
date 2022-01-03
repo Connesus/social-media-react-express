@@ -9,11 +9,13 @@ interface createPostRequest extends Request {
 const postController: { [key: string]: RequestHandler } = {
     getPage: async (req, res) => {
         const { keyId } = req.body;
-        const nextPosts = await PostService.getPaginatedPosts({ keyId })
+        const userId = req.session?.userData?.id;
+        const nextPosts = await PostService.getPaginatedPosts({ keyId, userId })
         res.json(nextPosts);
     },
     getPost: async (req, res) => {
-        res.json(await PostService.findPostById(req.params.id));
+        const data = await PostService.findPostById(req.params.id, req.session?.userData?.id)
+        res.json(data[0]);
     },
     likePost: async (req, res) => {
         const { postId } = req.body;
@@ -30,7 +32,9 @@ const postController: { [key: string]: RequestHandler } = {
             imageId = newImage.id;
         }
         console.log(imageId ? `imageId: ${imageId}` : 'No image');
-        const postData = JSON.parse(JSON.parse(req.body.postData));
+        console.log(req.body.postData)
+        console.log(JSON.parse(req.body.postData))
+        const postData = JSON.parse(req.body.postData);
         await PostService.createPost({ ...postData, imageId })
         res.end()
     }
