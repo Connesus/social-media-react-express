@@ -1,9 +1,9 @@
-import { IPostDefinitions } from '@backend/model/post';
-import {ActionCreatorWithoutPayload, createSlice, PayloadAction} from '@reduxjs/toolkit';
+import { createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {IPost} from "@shared/types";
 
 export interface PostState {
-    postFeed: IPostDefinitions[],
-    currentPost: IPostDefinitions | undefined
+    postFeed: IPost[],
+    currentPost: IPost | undefined;
 }
 
 const initialState: PostState = {
@@ -19,14 +19,15 @@ export const postSlice = createSlice({
         loadMorePosts: (state, action: PayloadAction<undefined>) => {
             console.log('Loading more posts');
         },
-        // @ts-ignore
-        addPostsToFeed: (state, action: PayloadAction<IPostDefinitions[]>) => ({
-            // @ts-ignore
-            postFeed: [...state.postFeed, ...action.payload]
-        }),
-        // setCurrentPost: (state, action: PayloadAction<undefined>)
+        addPostsToFeed: (state, action: PayloadAction<IPost[]>) => {
+            state.postFeed = action.payload;
+        },
+        setCurrentPost: (state, action: PayloadAction<IPost>) => {
+            state.currentPost = action.payload;
+        }
     }
 })
 
-export const { addPostsToFeed, loadMorePosts, getPostById } = postSlice.actions;
+export const { addPostsToFeed, loadMorePosts, getPostById, setCurrentPost } = postSlice.actions;
+// @ts-ignore
 export default postSlice.reducer;
