@@ -1,6 +1,5 @@
-import { SessionUserT } from '@backend/utils/helpers';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { LoginDataT } from '../sagas/requests/user';
+import {SessionUserT, UserLoginDataT} from "@shared/types";
 
 export interface UserState {
     username: string,
@@ -18,7 +17,7 @@ export const userSlice = createSlice({
     name: 'user',
     initialState,
     reducers: {
-        loginUser: (state, action: PayloadAction<LoginDataT>) => { },
+        loginUser: (state, action: PayloadAction<UserLoginDataT>) => { },
         createUser: (state, action) => { },
         getSessionData: (state, action: PayloadAction<undefined>) => { },
         setSessionData: (state, action: PayloadAction<SessionUserT>) => {
