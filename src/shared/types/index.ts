@@ -1,13 +1,13 @@
 export interface IUser {
-  id: string;
+  _id: string;
   username: string;
   imageId?: string;
 }
 
 export interface IPost {
   _id: string;
-  author: IUser;
-  user: PostUserDataT;
+  author: IUser['_id'];
+  user?: PostUserDataT;
   counter: PostCounterT;
   text?: string;
   imageId?: string;
