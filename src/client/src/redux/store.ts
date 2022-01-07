@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 import userReducer from './slice/user'
 import postReducer from './slice/post'
+import requestReducer from './slice/request'
 import createSagaMiddleware from 'redux-saga'
 import { watcherSaga } from './sagas/rootSaga'
 
@@ -11,6 +12,7 @@ export const store = configureStore({
     reducer: {
         user: userReducer,
         post: postReducer,
+        request: requestReducer
     },
     middleware: [sagaMiddleware],
     devTools: true
