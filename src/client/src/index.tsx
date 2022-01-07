@@ -15,6 +15,7 @@ import { getSessionData } from "./redux/slice/user";
 import { Feed } from "./components/Feed";
 import {PostPage} from "./components/PostPage";
 import 'modern-normalize/modern-normalize.css';
+import {ProfilePage} from "./components/ProfilePage";
 // import 'destyle.css'
 
 store.dispatch(getSessionData());
@@ -25,6 +26,7 @@ ReactDOM.render(
       <Routes>
         <Route path="/" element={<RequireLogin><Layout><Feed/></Layout></RequireLogin>} />
         <Route path='/post/:postId' element={<RequireLogin><Layout><PostPage /></Layout></RequireLogin>}/>
+        <Route path='/profile/:authorId' element={<RequireLogin><Layout><ProfilePage /></Layout></RequireLogin>}/>
         <Route path="/login" element={<LoginPage />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
