@@ -1,5 +1,5 @@
 import {api} from "./utils";
-import {IPost} from "@shared/types";
+import {IPost, IUser} from "@shared/types";
 
 export function requestLoadMorePosts() {
   return api<IPost[]>('http://localhost:8081/api/post/page', {
@@ -8,8 +8,13 @@ export function requestLoadMorePosts() {
   });
 }
 
+export type getPostByIdResponseT = {
+  posts: {[_id: string]: IPost};
+  authors: {[_id: string]: IUser};
+}
+
 export function requestGetPostById(postId: string) {
-  return api<IPost>(`http://localhost:8081/api/post/${postId}`, {
+  return api<getPostByIdResponseT>(`http://localhost:8081/api/post/${postId}`, {
     method: 'GET',
     credentials: 'include'
   });
