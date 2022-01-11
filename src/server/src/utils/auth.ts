@@ -9,8 +9,8 @@ interface IAuthController {
 const auth: IAuthController = {
     isAuthenticated: (req, res, next) => {
         if ((req.session.id && req.session.userData) || NODE_ENV != 'production') {
-            next()
             console.log('auth')
+            return next()
         } else {
             res.statusCode = 401;
             res.end('Authentication required')

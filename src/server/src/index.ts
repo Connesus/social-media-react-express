@@ -45,7 +45,7 @@ const mongoUrl = `${MONGO_URI}${MONGO_PORT}`;
         apiRouter.use('/user', userRoutes);
         apiRouter.use('/session', sessionRouter);
         apiRouter.use('/seed', seedRouter)
-        apiRouter.use('/post', auth.isAuthenticated, postRouter)
+        apiRouter.use('/post', postRouter)
 
 
         app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
