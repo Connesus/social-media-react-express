@@ -11,8 +11,8 @@ export interface ILike extends Document {
 
 
 const likeSchema = new Schema<ILike>({
-    postId: { type: Schema.Types.ObjectId, required: true },
-    userId: { type: Schema.Types.ObjectId, required: true }
+    postId: { type: Schema.Types.ObjectId, required: true, index: true },
+    userId: { type: Schema.Types.ObjectId, required: true, index: true }
 })
 
 export const LikeModel = model<ILike>('Like', likeSchema);
