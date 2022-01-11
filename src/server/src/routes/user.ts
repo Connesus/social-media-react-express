@@ -5,6 +5,6 @@ import auth from '../utils/auth.js';
 const userRoutes = Router();
 
 userRoutes.get('/:username', auth.isAuthenticated, UserController.get);
-userRoutes.post('/', UserController.create)
+userRoutes.post('/create', UserController.create)
 
 export default userRoutes;

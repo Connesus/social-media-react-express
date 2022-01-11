@@ -10,6 +10,12 @@ const postRouter = Router();
 postRouter.get('/:id', postController.getPost);
 postRouter.post('/page', postController.getPage);
 postRouter.post('/like', postController.likePost);
-postRouter.post('', upload.single('image'), postController.createPost);
+postRouter.post('/create', upload.single('file'), postController.createPost);
+postRouter.post('/user', postController.getUserPosts);
+postRouter.post('/repost', postController.createPost);
+postRouter.post('/replies', postController.getPostReplies)
+postRouter.delete('/delete/:id', postController.deletePostById)
+postRouter.post('/repost/:id', postController.makeRepost)
+
 
 export default postRouter;
