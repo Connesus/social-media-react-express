@@ -1,36 +1,48 @@
-import {IUser, UserModel} from "../model/user.js";
+import {IUser, IUserDef, UserModel} from "../model/user.js";
 import {UserLoginDataT} from "@shared/types";
-
-interface IPartialUserFilter {
-    username?: string;
-    email?: string;
-    password?: string;
-}
+import {ObjectId} from "mongoose";
+import mongoose from "mongoose";
 
 
 
 export class UserService {
-  static async getUser(userData: IPartialUserFilter) {
-    return await UserModel.findOne(userData)
+  static async getUsersById(ids: mongoose.Types.ObjectId[], showEmail = false) {
+    return UserModel.aggregate([
+      {$match: {_id: {$in: ids}}},
+      {$project: {__v: 0, password: 0}},
+      {$project: {email: showEmail ? 1 : 0}}
+    ])
+  }
+
+  static async getUserByUsername(username: string) {
+    return await UserModel.findOne({'username': username})
       .catch((error: Error) => {
         console.error(error);
         return error;
       });
   }
-  static async createUser (userData: IUser) {
+  static async createUser (userData: IUserDef) {
     return await UserModel.create(userData);
   }
-  static generateUserLoginFilter (login: UserLoginDataT['login']) {
-    if (login.type === 'email') {
-      return {email: login.email}
-    } else if (login.type === 'username') {
-      return {username: login.username}
-    } else {
-      throw new Error('ERROR: Missing login type property');
+  // static generateUserLoginFilter (login: UserLoginDataT['login']) {
+  //   try {
+  //     if (login.type === 'email') {
+  //       return {email: login.email}
+  //     } else if (login.type === 'username') {
+  //       return {username: login.username}
+  //     } else {
+  //       throw new Error('ERROR: Missing login type property');
+  //     }
+  //   } catch (e) {
+  //     console.log('bruh')
+  //   }
+  // }
+  static async getUserLogin ({password, username}: UserLoginDataT) {
+    const user = await UserService.getUserByUsername(username);
+
+    if (user instanceof Error) {
+      return user;
     }
-  }
-  static async getUserLogin ({password, login}: UserLoginDataT) {
-    const user = await UserModel.findOne(this.generateUserLoginFilter(login));
 
     if (user && user.password === password) {
       return user;

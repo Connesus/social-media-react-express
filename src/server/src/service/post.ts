@@ -1,47 +1,93 @@
 import { LikeModel } from '../model/like.js';
-import mongoose, {
+import {
     Document,
     MongooseQueryOptions,
     FilterQuery,
-    ObjectId,
     DocumentDefinition,
     PipelineStage
 } from "mongoose";
-import {IUser, UserCollectionName} from "../model/user.js";
+import mongoose from 'mongoose';
+import {IUser, UserCollectionName, UserModel} from "../model/user.js";
 import {IPost, Post} from "../model/post.js";
 import {LikeService} from "./like.js";
+import {UserService} from "./user.js";
+const {ObjectId} = mongoose.Types;
 
 
 type getPaginatedPostsOptionsT = {
     // query: FilterQuery<IPost>,
     // prevPosts?: IPost[] | Falsy,
-    keyId: IPost['id'] | undefined
+    id: IPost['id'] | undefined
     limit?: number
-    userId?: IUser['_id']
+    userId?: mongoose.Types.ObjectId;
 };
 
-const postSharedPipeline: (userId: IUser['_id']) => PipelineStage[] = (userId) => [{$addFields: {
-        "counter.likeCount": {$size:  {"$cond": [{ "$isArray": "$likes" },"$likes", []]}},
-        "counter.replyCount": {$size:  {"$cond": [{ "$isArray": "$replies" },"$replies", []]}},
-        "counter.repostCount": {$size:  {"$cond": [{ "$isArray": "$replies" },"$replies", []]}},
-        "user.hasLiked": {$in: [userId, {"$cond": [{ "$isArray": "$likes" },"$likes", []]}]},
-        "user.hasReposted": {$in: [userId, {"$cond": [{ "$isArray": "$reposts" },"$reposts", []]}]},
-        "contentType": {$switch: {
-                branches: [
-                    {case: {$and: ["$imageId",  "$text"]}, then: "mixed"},
-                    {case: {$and: ['$text', {$not: '$imageId'}]}, then: "text"},
-                    {case: {$and: ['$imageId', {$not:  '$text'}]}, then: "image"},
-                ],
-            }}
+const postCounterFieldPipeline: PipelineStage =   {
+  $addFields: {
+    "counter.likeCount": {$size:  {"$cond": [{ "$isArray": "$likes" },"$likes", []]}},
+    "counter.replyCount": {$size:  {"$cond": [{ "$isArray": "$replies" },"$replies", []]}},
+    "counter.repostCount": {$size:  {"$cond": [{ "$isArray": "$reposts" },"$reposts", []]}}
+}};
+
+const postUserInteractionFieldPipeline: (userId?: mongoose.Types.ObjectId) => PipelineStage[] | [] = (userId) =>
+  userId ?
+  ([{
+  $addFields: {
+    "user.hasLiked": {$in: [userId, {"$cond": [{ "$isArray": "$likes" },"$likes", []]}]},
+    "user.hasReposted": {$in: [userId, {"$cond": [{ "$isArray": "$reposts" },"$reposts", []]}]},
+  }}]) : []
+
+const projectPostPipeline: PipelineStage = {$project: {likes: 0, replies: 0, reposts: 0, __v: 0}};
+const projectUserSecretsPipeline: PipelineStage = {$project: {password: 0, email: 0, __v: 0}};
+
+
+//        "contentType": {$switch: {
+//                 branches: [
+//                     {case: {$and: ["$imageId",  "$text"]}, then: "mixed"},
+//                     {case: {$and: ['$text', {$not: '$imageId'}]}, then: "text"},
+//                     {case: {$and: ['$imageId', {$not:  '$text'}]}, then: "image"},
+//                 ],
+//             }}
+
+const postAuthorLookupPipeline: PipelineStage = {
+  $lookup: {
+    from: UserCollectionName,
+    localField: 'author',
+    foreignField: '_id',
+    as: 'authorData'
+  }};
+
+const postUserProjectPipeline: PipelineStage = {
+  $project: {likes: 0, replies: 0, __v: 0, "authorData.password": 0, "authorData.email": 0}
+}
+
+const separateUsersPipeline: PipelineStage[] = [
+  {$facet: {
+        "posts": [
+            {$project: {authorData: 0}},
+            {$addFields: {
+                    "arrToObj": {
+                        "k": { $toString: "$_id"},
+                        "v": "$$ROOT"
+                    }
+                }},
+            {$replaceRoot: {newRoot: "$arrToObj"}}
+        ],
+        "users": [
+            {$unwind: "$authorData"},
+            {$addFields: {
+                    "arrToObj": {
+                        "k": { $toString: "$authorData._id"},
+                        "v": "$authorData"
+                    }
+                }},
+            {$replaceRoot: {newRoot: "$arrToObj"}}
+        ]
     }},
-    {$lookup: {
-            from: UserCollectionName,
-            localField: 'author',
-            foreignField: '_id',
-            as: 'author'
-        }},
-    {$unwind: "$author"},
-    {$project: {likes: 0, replies: 0, __v: 0, "author.password": 0, "author.email": 0}}]
+    {$addFields: {
+            "users": {$arrayToObject: "$users"},
+            "posts": {$arrayToObject: "$posts"}
+        }}]
 
 export class PostService {
     async findPost(
@@ -51,16 +97,29 @@ export class PostService {
 
     }
 
-    static async findPostById(id: IPost['_id'], userId?: string) {
+    static async findPostsById(ids: mongoose.Types.ObjectId[], userId?: mongoose.Types.ObjectId, postsOnly?: boolean) {
+      console.log('userId findbyid', ids)
         return Post.aggregate([
-            {$match: {_id: new mongoose.Types.ObjectId(id)}},
-            ...postSharedPipeline(userId)
-        ])
+          {$match: {_id: {$in: ids}}},
+          postCounterFieldPipeline,
+          ...(postUserInteractionFieldPipeline(userId)),
+          projectPostPipeline
+        ]);
+        // if (postsOnly) return {posts, users: []};
+        //
+        // const authorIds = posts.map(post => new mongoose.Types.ObjectId(post.author));
+        // const users = await UserModel.aggregate([
+        //   {$match: {_id: {$in: authorIds}}},
+        //   projectUserSecretsPipeline
+        // ])
+        //
+        // return {posts, users}
     }
+
 
     static async createPost({ createdAt, author, text, imageId, repostOf, replyTo }: {
         author: IPost['author'],
-        createdAt: IPost['createdAt'],
+        createdAt?: IPost['createdAt'],
         text?: IPost['text'],
         imageId?: IPost['imageId'],
         repostOf?: IPost['repostOf'],
@@ -69,9 +128,12 @@ export class PostService {
         console.log(imageId)
         const newPost = new Post({ author, imageId, createdAt, text, repostOf, replyTo })
         await newPost.save()
+      return newPost;
     }
 
-    static async deletePost(postId: ObjectId, userId: ObjectId) {
+    static async deletePost(
+      postId: mongoose.Types.ObjectId, userId: mongoose.Types.ObjectId
+    ) {
         const post = await Post.findById(postId);
         if (post == null) return { status: 404, message: 'Couldn\'t delete post: post not found' }
         if (post.author == userId) {
@@ -82,113 +144,96 @@ export class PostService {
 
     }
 
-    static async likePost(postId: IPost['id'], userId: IUser['_id']) {
-        const prevLike = await LikeService.getByUserAndPostIds(userId, postId)
+    static async likePost(id: string, userId: IUser['_id']) {
+      console.log(id, userId)
+      const postObjId = new mongoose.Types.ObjectId(id)
+      const userObjId = new mongoose.Types.ObjectId(userId)
 
-        if (prevLike == null) {
-            console.log('add like');
-            const newLike = new LikeModel({ postId, userId })
-            await newLike.save();
-            await Post.findByIdAndUpdate(postId, { "$push": { 'likes': newLike.id } })
+        const prevLike = await LikeService.getByUserAndPostIds(userObjId,postObjId)
+      console.log(prevLike)
+
+        if (prevLike.length) {
+          console.log('remove like');
+          await Post.findByIdAndUpdate(id, { '$pull': { 'likes': userObjId } });
+          // await prevLike[0].remove();
+          await LikeModel.deleteOne({_id: prevLike[0]._id})
         } else {
-            console.log('remove like');
-            await Post.findByIdAndUpdate(postId, { '$pull': { 'likes': prevLike.id } });
-            await prevLike.remove();
+          console.log('add like');
+          const newLike = new LikeModel({ postId: postObjId, userId: userObjId })
+          await newLike.save();
+          await Post.findByIdAndUpdate(id, { "$push": { 'likes': userObjId } })
         }
     }
 
-    static async getPaginatedPosts({ keyId, limit = 10, userId }: getPaginatedPostsOptionsT) {
-        // const userId = '61b317f9ce91939d35c2c704';
-        if (typeof keyId == 'undefined') {
+    static async getPaginatedPosts({ id, limit = 10, userId }: getPaginatedPostsOptionsT) {
+        if (typeof id == 'undefined') {
             console.log('prevPosts undefined')
-            // return Post.find({}).sort({_id: -1}).limit(limit).populate('postedBy')
             return Post.aggregate([
               {$match: {}},
               {$sort: {_id: -1}},
               {$limit: limit},
-              ...postSharedPipeline(userId)
+              postCounterFieldPipeline,
+              ...postUserInteractionFieldPipeline(userId),
+              projectPostPipeline
             ])
         }
 
-        console.log('prevPosts')
 
-        return Post.find({_id: {'$lt': keyId}}).sort({_id: -1}).limit(limit);
+        return Post.aggregate([
+          {$match: {_id: {'$lt': id}}},
+          {$sort: {_id: -1}},
+          {$limit: limit},
+          postCounterFieldPipeline,
+          ...postUserInteractionFieldPipeline(userId),
+          projectPostPipeline
+        ])
+        // return Post.find({_id: {'$lt': keyId}}).sort({_id: -1}).limit(limit);
+    }
+
+    static async getUserPostsByUsername(username: string, sessionUserId?: string) {
+      const user = await UserService.getUserByUsername(username);
+
+      if (user instanceof Error) {
+        console.error(user)
+        return user;
+      }
+      if (user) {
+        const postIds = user?.posts?.map((id: string) => new mongoose.Types.ObjectId(id)) || [];
+        const posts = await this.findPostsById(postIds, new mongoose.Types.ObjectId(sessionUserId));
+
+        return {posts, users: [user]}
+      }
+    }
+
+    static async replyToPostById(id: mongoose.Types.ObjectId, postId: mongoose.Types.ObjectId) {
+      return Post.findByIdAndUpdate(id, { "$push": { 'replies': postId } })
+    }
+
+    static async repostPost(postId: mongoose.Types.ObjectId, userId: mongoose.Types.ObjectId) {
+
+      const aggregateHasReposted = await Post.aggregate([
+        {$match: {_id: postId}},
+        {$addFields: {
+          "hasReposted": {$in: [userId, {"$cond": [{ "$isArray": "$reposts" },"$reposts", []]}]}
+          }}])
+      console.log('aggregateHasReposted',aggregateHasReposted);
+
+      if (aggregateHasReposted[0] && aggregateHasReposted[0].hasReposted) {
+        await Post.findByIdAndUpdate(postId, { '$pull': { 'reposts': userId } });
+        await Post.deleteOne({author: userId, repostOf: postId});
+
+      } else if (aggregateHasReposted[0] && !aggregateHasReposted[0].hasReposted) {
+        await Post.findByIdAndUpdate(postId, { '$push': { 'reposts': userId } });
+        return (await Post.create({author: userId, repostOf: postId}))._id;
+      }
+      // const postToRepost = await Post.findById(postId);
+      //
+      // const newPost = await Post.create({author: userId, repostOf: postId});
+      // await Post.updateOne(
+      //   {_id: postId},
+      //   {$push: {reposts: newPost._id}}
+      // )
+      // const posts = await PostService.findPostsById([postId, newPost._id], userId)
+
     }
 }
-
-// export class PostService {
-//     async GetPaginated(offset: number, limit: number) {
-//         // const posts = await Post.find({ $or: [{ type: 'post' }, { type: 'repost' }] }, null, { limit, offset })
-//         // const posts = await Post.aggregate([
-//         //     {$match: {}},
-//         //     {$count: 'count'},
-//         //     {$match: }
-//         // ])
-//         const firstPage = await Post.find().limit(3).exec();
-//         console.log(firstPage);
-//     }
-// }
-
-// type PaginationQueryOptionsT<T> {
-//     query: QuerySelector<T>,
-//     sort: [string, SortValues]
-// }
-
-// function getPaginatedPosts({ nextKeyFn }): ({ nextKeyFn: (Document[]) => ObjectId }): void {
-
-// }
-// type getPaginatedPostsT = (options: {
-//     nextKeyFn: (posts: Document<IPost>[]) => ObjectId
-// }) => string;
-// const getPaginatedPosts: getPaginatedPostsT = (options) => {
-//     const kek = options.nextKeyFn
-//     return '';
-
-// function generatePaginationQuery(options: PaginationQueryOptionsT) {
-//     const sortField = sort == null ? null : sort[0];
-
-//     function nextKeyFn(items) {
-//       if (items.length === 0) {
-//         return null;
-//       }
-
-//       const item = items[items.length - 1];
-
-//       if (sortField == null) {
-//         return { _id: item._id };
-//       }
-
-//       return { _id: item._id, [sortField]: item[sortField] };
-//     }
-
-//     if (nextKey == null) {
-//       return { query, nextKeyFn };
-//     }
-
-//     let paginatedQuery = query;
-
-//     if (sort == null) {
-//       paginatedQuery._id = { $gt: nextKey._id };
-//       return { paginatedQuery, nextKey };
-//     }
-
-//     const sortOperator = sort[1] === 1 ? "$gt" : "$lt";
-
-//     const paginationQuery = [
-//       { [sortField]: { [sortOperator]: nextKey[sortField] } },
-//       {
-//         $and: [
-//           { [sortField]: nextKey[sortField] },
-//           { _id: { [sortOperator]: nextKey._id } }
-//         ]
-//       }
-//     ];
-
-//     if (paginatedQuery.$or == null) {
-//       paginatedQuery.$or = paginationQuery;
-//     } else {
-//       paginatedQuery = { $and: [query, { $or: paginationQuery }] };
-//     }
-
-//     return { paginatedQuery, nextKeyFn };
-//   }
