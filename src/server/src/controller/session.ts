@@ -15,16 +15,18 @@ const SessionController: ISessionController = {
         try {
             const userData = await UserService.getUserLogin(req.body);
 
-            if (userData instanceof Error) {throw userData}
+            if (userData instanceof Error) {
+                return res.json({error: 'Wrong password or user doesn\'t exist.'})
+            }
             else if (userData && userData.password) {
                 const sessionUser = sessionizeUser(userData)
                 req.session.userData = sessionUser;
-                res.json(sessionUser);
+                return res.json(sessionUser);
             } else {
-                throw new Error('Invalid login credentials')
+                return res.json({error: 'Wrong password or user doesn\'t exist.'})
             }
         } catch (error) {
-            res.status(401).send(JSON.stringify(error, Object.getOwnPropertyNames(error)))
+            return res.json({error: 'Wrong password or user doesn\'t exist.'})
         }
     },
     logout: (req, res) => {
@@ -34,18 +36,17 @@ const SessionController: ISessionController = {
                 req.session.destroy(err => {
                     if (err) throw (err);
 
-                    res.clearCookie(SESS_NAME);
-                    res.send(user);
+                    return res.clearCookie(SESS_NAME).send(user);
                 })
             } else {
                 throw new Error('Something went wrong')
             }
         } catch (error) {
-            res.status(422).send(JSON.stringify(error, Object.getOwnPropertyNames(error)))
+            return res.status(500);
         }
     },
     check: (req, res) => {
-        res.json(req.session.userData || ({}));
+        return res.json(req.session.userData || ({}));
     },
 }
 
