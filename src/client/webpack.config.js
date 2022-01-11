@@ -1,8 +1,15 @@
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   entry: "./src/index.tsx",
+  devtool: "source-map",
+  mode: "development",
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "bundle.js",
+    publicPath: '/'
+  },
   module: {
     rules: [
       {
@@ -30,22 +37,37 @@ module.exports = {
         issuer: /\.[jt]sx?$/,
         use: ['@svgr/webpack'],
       },
-    ],
+    ]
   },
   resolve: {
-    extensions: [".tsx", ".ts", ".js"],
+    extensions: ['.ts', '.js', '.json', ".tsx", ".scss", 'css']
   },
-  output: {
-    filename: "bundle.js",
-    path: path.resolve(__dirname, "dist"),
-  },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, "src", "index.html"),
-    }),
-  ],
-  devtool: "source-map",
   devServer: {
+    port: 8000,
+    open: true,
+    hot: true,
     historyApiFallback: true,
+    proxy: {
+      '/**': {  //catch all requests
+        target: '/index.html',  //default target
+        secure: false,
+        bypass: function(req, res, opt){
+          //your custom code to check for any exceptions
+          //console.log('bypass check', {req: req, res:res, opt: opt});
+          if(req.path.indexOf('/img/') !== -1 || req.path.indexOf('/public/') !== -1){
+            return '/'
+          }
+
+          if (req.headers.accept.indexOf('html') !== -1) {
+            return '/index.html';
+          }
+        }
+      }
+    }
   },
-};
+  plugins: [new HtmlWebpackPlugin({
+    template: "public/index.html",
+    hash: true, // For cache busting
+    filename: '../dist/index.html'
+  })]
+}
