@@ -1,18 +1,38 @@
 services:
-  # client:
-  # server:
-  server:
-    build:
-      dockerfile: ./server/Dockerfile
-      context: ./src
-    working_dir: /home/node/app/server
-#    command: "npm run build:watch"
-    # network_mode: bridge
-    ports:
+#    client:
+#     build:
+#       dockerfile: ./client/Dockerfile
+#       context: ./src
+#     working_dir: /home/node/app/client
+#     ports:
+#       - 8080:80
+#     volumes:
+#       - ./src/client:/home/node/app/client
+#       - /home/node/app/client/node_modules/
+#     depends_on:
+#       - server
+    server:
+      build:
+        dockerfile: ./server/Dockerfile
+        context: ./src
+      working_dir: /home/node/app/server
+      ports:
       - 8081:8081
-    volumes:
-      - ./src/server:/home/node/app/server
-      - /home/node/app/server/node_modules/
+#      expose:
+#        - 8081
+      volumes:
+        - ./src/server:/home/node/app/server
+        - /home/node/app/server/node_modules/
+    database:
+      image: mongo
+      volumes:
+        - ./mongodbdata:/data/db
+      expose:
+        - 27017
+      ports:
+        - 27017:27017
+      logging:
+        driver: "none"
   # server:
   #   image: "node:alpine"
   #   user: "user"
@@ -24,15 +44,5 @@ services:
   #     # - ./node_modules:/home/node/app/node_modules
   #   ports:
   #     - 8081:8081
-  #   command: "npm run start"
-  database:
-    image: mongo
-    volumes:
-      - ./mongodbdata:/data/db
-    expose:
-      - 27017
-    ports:
-      - 27017:27017
-    logging:
-      driver: "none"
+  #     command: "npm run start"
     # network_mode: bridge
