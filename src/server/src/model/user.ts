@@ -1,22 +1,46 @@
-import mongoose, {Document, SchemaDefinition} from "mongoose";
-import {IPost} from "./post.js";
+import bcrypt from 'bcrypt';
+import mongoose, {Document, Model, Types} from "mongoose";
 const { model, Schema } = mongoose;
 
-export interface IUser extends Document {
+export interface IUser {
     username: string;
-    email?: string;
-    password: string;
-    posts?: IPost["_id"][] | undefined
+    description?: string
+    imageId?: mongoose.Types.ObjectId;
+    createdAt: Date;
 }
 
-export interface IUserDef extends SchemaDefinition<IUser> {}
+export interface IUserDoc extends IUser, Document<Types.ObjectId> {
+    verifyPassword(password: string): boolean;
+}
 
-const userSchema = new Schema<IUser>({
-    username: { type: String, required: true, unique: true, index: true },
-    password: { type: String, required: true },
-    email: { type: String, unique: true, index: true },
-    posts: {type: [Schema.Types.ObjectId], ref: 'Post', default: undefined}
+export interface IUserModel extends Model<IUserDoc> {}
+
+const UserSchema = new Schema<IUserDoc>({
+    username: {
+        type: String,
+        required: true,
+        unique: true,
+        index: true,
+        trim: true
+    },
+    description: {
+        type: String,
+        trim: true
+    },
+    imageId: {
+        type: mongoose.Types.ObjectId,
+        ref: 'Image'
+    },
+    createdAt: {
+        type: Date,
+        required: true
+    }
 })
 
-export const UserModel = model<IUser>('User', userSchema);
-export const UserCollectionName = UserModel.collection.collectionName;
+UserSchema.pre<IUserDoc>('save', function (next) {
+    if (!this.createdAt) this.createdAt = new Date();
+    next();
+})
+
+export const User = model<IUserDoc, IUserModel>('users', UserSchema, 'users');
+export const UserCollectionName = User.collection.collectionName;
