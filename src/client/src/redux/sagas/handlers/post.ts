@@ -1,39 +1,155 @@
 import { call, put } from "@redux-saga/core/effects"
-import {getPostByIdResponseT, requestGetPostById, requestLoadMorePosts} from "../requests/post";
-import {addPostsToFeed, mergePostsById, mergeAuthorsById, } from '../../slice/post'
-import {GET_POST_BY_ID_REQUEST, GET_POST_BY_ID_SUCCESS, GET_POST_BY_ID_FAIL} from '../../slice/request'
-import {PayloadAction} from "@reduxjs/toolkit";
-import {IPost} from "@shared/types";
+import {
+  requestCreatePost, requestDeletePost, requestFetchPostsByIds,
+  requestFetchUserPosts,
+  requestGetPostById,
+  requestLikePost,
+  requestLoadMorePosts, requestRepost
+} from "../requests/post";
+// import {addPostsToFeed, mergePostsById, getPostByIdRequestActions,} from '../../slice/post'
+import {setManyUsers} from '../../slice/users'
+import {PayloadAction, Update} from "@reduxjs/toolkit";
+import {getPostsResponseT, IPost} from "@shared/types";
+import {
+  fetchPostByIdRequestActions,
+  setManyPosts,
+  addToFeed,
+  addToProfileIds,
+  upsertManyPosts,
+  deleteOnePost
+} from "../../slice/posts";
+import { StrictEffect } from '@redux-saga/types';
+import {Simulate} from "react-dom/test-utils";
+import change = Simulate.change;
 
-export function* handleLoadMorePosts(): Generator<any> {
+export function* handleLoadMorePosts(action: PayloadAction<string | undefined>): Generator<any, any, getPostsResponseT> {
   try {
-    const data = yield call(requestLoadMorePosts);
-    // console.log(data)
-    if (data && Array.isArray(data)) {
-      console.log('MOREDATA!')
-      yield put(addPostsToFeed(data))
-    } else {
-    console.log('LoadMorePosts empty')
-      }
+    // @ts-ignore
+    const response: getPostsResponseT = yield call(requestLoadMorePosts, action.payload);
+
+    if (Array.isArray(response.users) && Array.isArray(response.posts)) {
+      const feedIds = response.posts.map(post => post._id);
+      yield put(addToFeed(feedIds));
+      yield put(setManyPosts(response.posts))
+      yield put(setManyUsers(response.users))
+    }
   } catch (e) {
     console.error(e);
   }
 }
 
-export function* handleGetPostById({payload}: PayloadAction<{postId: string; reqId: string}>): Generator<any, any, getPostByIdResponseT> {
+export function* handleGetPostById({payload}: PayloadAction<{postId: string; reqId: string}>): Generator<any, any, getPostsResponseT> {
   const {postId, reqId} = payload;
   try {
-    yield put(GET_POST_BY_ID_REQUEST(reqId));
-    const response: getPostByIdResponseT = yield call(requestGetPostById, postId);
+    yield put(fetchPostByIdRequestActions.Request(reqId));
+    console.log('reqyu', reqId)
+    const response: getPostsResponseT = yield call(requestGetPostById, postId);
 
-    yield put(mergePostsById(response.posts))
-    yield put(mergeAuthorsById(response.authors))
+    yield put(setManyPosts(response.posts))
+    yield put(setManyUsers(response.users))
 
-    yield put(GET_POST_BY_ID_SUCCESS(reqId))
+    yield put(fetchPostByIdRequestActions.Success(reqId))
   } catch (error) {
     if (error instanceof Error) {
 
-      yield GET_POST_BY_ID_FAIL({id: reqId, error: error.message});
+      yield fetchPostByIdRequestActions.Error({id: reqId, error: error.message});
     }
 }
 }
+
+export function* handleLikePost(action: PayloadAction<string>): Generator<any, any, getPostsResponseT> {
+  const postId = action.payload;
+  try {
+    const response: getPostsResponseT = yield call(requestLikePost, postId);
+
+    yield put(setManyPosts(response.posts));
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+
+export function* handleFetchUserPosts(action: PayloadAction<string>): Generator<any, any,getPostsResponseT> {
+  const username = action.payload;
+  try {
+    const response: getPostsResponseT = yield call(requestFetchUserPosts, username);
+
+    // yield put(addToProfileIds(response.posts || []))
+
+    const postIds = Array.isArray(response.posts) ? response.posts?.map(post => post._id) : [];
+    console.log('pIds', postIds)
+    yield put(addToProfileIds(postIds))
+    yield put(setManyPosts(response.posts));
+    yield put(setManyUsers(response.users));
+
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export function* handleCreatePost(action: PayloadAction<FormData>): Generator<any, any, getPostsResponseT> {
+  const formData = action.payload;
+  try {
+    const response: getPostsResponseT = yield call(requestCreatePost, formData);
+    console.log(response);
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+
+export function* handleReplyToPost(action: PayloadAction<FormData>): Generator<any, any, getPostsResponseT> {
+  const formData = action.payload;
+  try {
+    const response: getPostsResponseT = yield call(requestCreatePost, formData);
+    if (response.posts && Array.isArray(response.posts)) {
+      const ids = response.posts.map(post => post._id);
+      yield put(upsertManyPosts(response.posts));
+    }
+    console.log(response);
+
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+export function* handleFetchPostsByIds(action: PayloadAction<string>): Generator<any, any, getPostsResponseT> {
+  const postId = action.payload;
+  try {
+    const response: getPostsResponseT = yield call(requestFetchPostsByIds, postId)
+    if (response.posts) {
+      yield put(upsertManyPosts(response.posts));
+    }
+    console.log(response)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+export function* handleDeletePost(action: PayloadAction<string>): Generator<any, any, Boolean> {
+  const postId = action.payload;
+  try {
+    const response: Boolean = yield call(requestDeletePost, postId);
+
+    if (response) {
+      // Delete post by id from cache
+      yield put(deleteOnePost(postId))
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+export function* handleRepost(action: PayloadAction<string>): Generator<any, any, getPostsResponseT> {
+  const postId = action.payload;
+  try {
+    const response: getPostsResponseT = yield call(requestRepost, postId);
+
+    if (response.posts) {
+      yield put(upsertManyPosts(response.posts))
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
+

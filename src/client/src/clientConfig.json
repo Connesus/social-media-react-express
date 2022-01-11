@@ -1,0 +1,6 @@
+{
+  "name": "production",
+  "apiBaseUrl": "http://localhost:8081/api",
+  "baseUrl": "http://localhost:8081",
+  "productionDomain": "social.ffsimonov.com"
+}

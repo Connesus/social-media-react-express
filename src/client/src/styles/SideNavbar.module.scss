@@ -1,0 +1,15 @@
+.SideNavbar {
+  display: flex;
+  justify-self: start;
+  //align-self: start;
+  flex-direction: column;
+  gap: 48px;
+  justify-content: center;
+
+    &__link {
+      padding: 20px;
+      text-decoration: underline;
+      color: black;
+      font-weight: bold;
+  }
+}

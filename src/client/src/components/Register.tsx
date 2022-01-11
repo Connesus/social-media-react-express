@@ -1,18 +1,10 @@
-import {Ref, SyntheticEvent, useCallback, useEffect, useState} from "react";
-import React from "react"
-import { useDispatch } from "react-redux";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import {UserLoginDataT} from "@shared/types";
-import {loginUser, selectIsLoggedIn} from "../redux/slice/auth";
-import {types} from "node-sass";
+import React, {SyntheticEvent, useEffect} from "react"
+import {useDispatch, useSelector} from "react-redux";
+import {createUser, selectIsLoggedIn} from "../redux/slice/auth";
+import {useLocation, useNavigate} from "react-router-dom";
 
-const user: UserLoginDataT = {
-  username: 'sus',
-  password: "sus",
-};
 
-const LoginPage = React.memo( () => {
+export const Register = React.memo( () => {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector(selectIsLoggedIn);
   const location = useLocation();
@@ -30,18 +22,17 @@ const LoginPage = React.memo( () => {
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-    console.log(usernameRef);
     if (usernameRef.current && passwordRef.current) {
-      dispatch(loginUser({
+      dispatch(createUser({
         password: passwordRef.current.value,
         username: usernameRef.current.value
       }))
     }
-    }
+  }
 
   return (
     <form onSubmit={handleSubmit} style={{display: "flex", flexDirection: "column", gap: "16px"}}>
-      LOGIN PAGE
+      REGISTER PAGE
       <div>
         <label>Username:</label>
         <input ref={usernameRef} type={'text'}/>
@@ -50,12 +41,9 @@ const LoginPage = React.memo( () => {
         <label>Password:</label>
         <input ref={passwordRef} type={'password'} />
       </div>
-      <Link to={'/register'}>Register</Link>
       <div>
         <button type="submit">Submit</button>
       </div>
     </form>
   );
 });
-
-export default LoginPage;

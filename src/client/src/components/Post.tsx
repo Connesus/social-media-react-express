@@ -1,87 +1,160 @@
-import * as React from "react";
+import React, {useCallback} from "react"
 import style from '../styles/Post.module.scss';
-import {IPost} from "@shared/types";
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import jdenticon from "jdenticon/standalone";
-import {useEffect, useState} from "react";
+import {memo, useEffect, useState} from "react";
 import {RepostIcon} from "./icons/RepostIcon";
 import {LikeIcon} from "./icons/LikeIcon";
 import {CommentIcon} from "./icons/CommentIcon";
+import {useDispatch, useSelector} from "react-redux";
+import {RootState} from "../redux/store";
+import {
+  deletePostAction,
+  fetchPostReplies,
+  likePostAction,
+  replyToPostAction, repostPostAction,
+  selectPostState
+} from "../redux/slice/posts";
+import {selectUserState} from "../redux/slice/users";
+import {CreatePost} from "./CreatePost";
+import * as clientConfig from '../clientConfig.json';
+const {baseUrl} = clientConfig;
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
+import {DotsIcon} from "./icons/Dots";
 
-export const Post: React.FC<IPost> = (
-  {_id, text, imageId, author, createdAt, counter, user}
-  ) => {
+const formatPostDate = (date: Date) => `${date.getDay()}.${date.getMonth()}.${date.getFullYear()}`;
+
+
+export const Post: React.FC<{id?: string, authorId?: string, showReplies?: boolean}> =memo(
+  ({id, showReplies}) => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  // const post = useSelector((state:RootState) => id && selectPostState.selectById(state, id));
+  // const author = useSelector((state:RootState) => post && selectUserState.selectById(state, post.author));
+    const authData = useSelector((state: RootState) => state.auth);
+  const {post, author} = useSelector((state: RootState) => {
+    if (id) {
+      const post = selectPostState.selectById(state, id);
+      if (post) {
+        const author = selectUserState.selectById(state, post.author);
+        return {post, author}
+    }}
+    return {}
+  })
+
+  const [formattedCreatedAt, setFormattedCreatedAt] = useState<string>('');
   const [textParts, setTextParts] = useState<string[]>([]);
+  const [showCreateReply, setShowCreateReply] = useState(false);
 
   useEffect(() => {
-    if (text) {
-      setTextParts(text.replace(/ /g, ", ").split(','));
+    if (post) {
+      if (post.text) {
+        setTextParts(post.text.replace(/ /g, ", ").split(','));
+      }
+      if (post.createdAt) {
+        setFormattedCreatedAt(formatPostDate(new Date(post.createdAt)))
+      }
+      if (showReplies && post._id && !post.replies) {
+        dispatch(fetchPostReplies(post._id));
+      }
     }
-  }, [text])
+  }, [post])
 
-  console.log('AUTHOR', author)
+  const handleLikeButton = useCallback(() => {
+    if (id) {
+      dispatch(likePostAction(id));
+    }
+  }, [id])
 
+  const onClickNavigateToPost = useCallback(() => post && navigate(`/post/${post._id}`), [navigate, post])
 
-  const date = new Date(createdAt);
-  const dateStr = `${date.getDay()}.${date.getMonth()}.${date.getFullYear()}`;
+  const handleReplyButton = useCallback(() => {
+    setShowCreateReply(!showCreateReply);
+  }, [showCreateReply])
 
-  return _id ? (
-    <div className={style.PostContainer}>
+  const handleRepostButton = useCallback(() => {
+    if (id){
+      dispatch(repostPostAction(id));
+    }
+  }, [id])
+
+  const handleDeletePostButton = useCallback(() => {
+    if (post && post.author && authData.id) {
+      dispatch(deletePostAction(post._id))
+    }
+  }, [post, authData])
+
+  return ( author ? <div className={style.PostContainer}>
       <div className={style['PostContainer__avatar-container']}>
-        <Link to={`/profile/${author.username}`}>
-        <Avatar username={author?.username} imageId={author?.imageId || ''} height={'48px'} width={'48px'}/>
+        <Link to={`/user/${author.username}`}>
+          <Avatar username={author?.username} imageId={author?.imageId || ''} height={'48px'} width={'48px'}/>
         </Link>
       </div>
       <div className={style.PostContainer__content}>
-        <div className={style.PostContainer__header}>
-          <Link to={`/profile/${author.username}`} className={style["PostContainer__header-username"]}>
-            {author.username}
-          </Link>
-          <h6 className={style['PostContainer__header-date']}>{dateStr}</h6>
+          <div className={style.PostContainer__header}>
+            <Link to={`/user/${author.username}`} className={style["PostContainer__header-link-container"]}>
+              <span className={style["PostContainer__header-username"]}>{author.username}</span>
+            <h6 className={style['PostContainer__header-date']}>{formattedCreatedAt}</h6>
+            </Link>
+            {post?.author === authData.id &&
+            <Popup
+              trigger={
+                <div className={style["PostContainer__header-popup-container"]}>
+                  <DotsIcon  width={'20px'} height={'20px'}/>
+                </div>}
+              position="bottom right"
+            >
+                <button onClick={handleDeletePostButton}>Delete Post</button>
+            </Popup>}
+          </div>
+        <div onClick={onClickNavigateToPost} className={style["PostContainer__content-text"]}>
+          {post?.text && textParts.map((part, i) => {
+            const reUser = part.match(/(?<=\s@)[\S+]*/)
+            if (reUser) {
+              console.log(reUser[0]);
+              return <Link to={`${baseUrl}static/image/${reUser[0]}`} key={i}>{part}</Link>
+            }
+            const reUrl = part.match(/\bhttp(s)?:\/\/\S+/);
+            if (reUrl) {
+              return <a href={part} key={i}>{part}</a>
+            }
+            return part;
+          })}
         </div>
-        <div className={style["PostContainer__content-text"]}>
-        {text && textParts.map((part, i) => {
-          const reUser = part.match(/(?<=\s@)[\S+]*/)
-          if (reUser) {
-            console.log(reUser[0]);
-            return <Link to={`http://localhost:8081/static/image/${reUser[0]}`} key={i}>{part}</Link>
-          }
-          const reUrl = part.match(/\bhttp(s)?:\/\/\S+/);
-          if (reUrl) {
-            return <a href={part} key={i}>{part}</a>
-          }
-          return part;
-        })}
-        </div>
-        {imageId && (<div className={style["PostContainer__content-attachment"]}>
+        {post?.imageId && (<div onClick={onClickNavigateToPost} className={style["PostContainer__content-attachment"]}>
           <img
             className={style["PostContainer__content-attachment-image"]}
-            src={`http://localhost:8081/static/image/${imageId}`}
-            alt={text}
+            src={`${baseUrl}/static/image/${post?.imageId}`}
+            alt={post?.text}
           />
         </div>)}
         <div className={style["PostContainer__content-interaction"]}>
-          <div className={style["PostContainer__content-interaction-reply"]}>
-            <CommentIcon color='black' width='20px' height='20px' />
-            <span>{counter.replyCount}</span>
-          </div>
-          <div className={style["PostContainer__content-interaction-repost"]}>
-            <RepostIcon width='24px' height='24px' color={user.hasReposted ? 'blue' : 'black'} />
-            <span>{counter.repostCount}</span>
-          </div>
-          <div className={style["PostContainer__content-interaction-like"]}>
-            <LikeIcon width='20px' height='20px' color={user.hasReposted ? 'red' : 'black'}/>
-            <span>{counter.likeCount}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  ) : <h3>Loading</h3>;
-};
 
-const Avatar: React.FC<{username: string, imageId: string, width?: string, height?: string}> = ({username, imageId, width, height}) => {
+          <button onClick={handleReplyButton} className={style["PostContainer__content-interaction-reply"]}>
+            <CommentIcon color='black' width='20px' height='20px'/>
+            <span>{post?.counter.replyCount}</span>
+          </button>
+
+          <button onClick={handleRepostButton} className={style["PostContainer__content-interaction-repost"]}>
+              <RepostIcon width='24px' height='24px' color={post?.user?.hasReposted ? 'blue' : 'black'}/>
+              <span>{post?.counter.repostCount}</span>
+          </button>
+
+          <button onClick={handleLikeButton} className={style["PostContainer__content-interaction-like"]}>
+            <LikeIcon width='20px' height='20px' color={post?.user?.hasLiked ? 'red' : 'black'}/>
+            <span>{post?.counter.likeCount}</span>
+          </button>
+        </div>
+        {showCreateReply && <CreatePost replyTo={id} />}
+        {(showReplies && post?.replies) &&  post.replies.map(id => <Post id={id} key={id} />)}
+      </div>
+    </div> : <><h3>Loading</h3></>);
+});
+
+export const Avatar: React.FC<{username: string, imageId?: string, width?: string, height?: string}> = ({username, imageId, width, height}) => {
   const src = imageId
-    ? `http://localhost:8081/static/image/${imageId}`
+    ? `${baseUrl}/static/image/${imageId}`
     : `data:image/svg+xml;utf8,${encodeURIComponent(jdenticon.toSvg(username || 'username', 48))}`
   return <img
     className={style.Avatar}

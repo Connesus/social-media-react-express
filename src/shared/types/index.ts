@@ -13,6 +13,7 @@ export interface IPost {
   imageId?: string;
   contentType: "text" | "image" | 'mixed';
   createdAt: Date;
+  replies?: string[];
 }
 
 export type PostUserDataT = {
@@ -31,7 +32,8 @@ export type PostContentT = {type: 'text', text: string} | {type: 'image', imageI
 // export type LoginDataT = {'email': string; password: string;}
 export type UserLoginDataT = {
   password: string;
-  login: {type: 'email', email: string} | {type: 'username', username: string}
+  username: string;
+  // login: {type: 'email', email: string} | {type: 'username', username: string}
 }
 
 
@@ -52,4 +54,10 @@ export type UserLoginDataT = {
 export interface SessionUserT {
   id: string,
   username: string
+  role?: 'user' | 'admin'
+}
+
+export type getPostsResponseT = {
+  posts: {[_id: string]: IPost} | IPost[];
+  users: {[_id: string]: IUser} | IUser[];
 }

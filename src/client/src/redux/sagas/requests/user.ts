@@ -1,10 +1,12 @@
 import {api} from "./utils";
 import {IUser, SessionUserT, UserLoginDataT} from "@shared/types";
+import * as clientConfig from '../../../clientConfig.json';
+const {apiBaseUrl} = clientConfig;
 
 // Implementation code where T is the returned data shape
 
-export function requestCreateUser(newUser: IUser) {
-    return api('http://localhost:8081/api/user/', {
+export function requestCreateUser(newUser: UserLoginDataT) {
+    return api<SessionUserT>(apiBaseUrl + '/user/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newUser),
@@ -14,7 +16,7 @@ export function requestCreateUser(newUser: IUser) {
 
 
 export function requestLoginUser(userData: UserLoginDataT) {
-    return api<SessionUserT>('http://localhost:8081/api/session/', {
+    return api<SessionUserT>(apiBaseUrl + '/session/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
@@ -23,7 +25,7 @@ export function requestLoginUser(userData: UserLoginDataT) {
 }
 
 export function requestLoginStatus() {
-    return api<SessionUserT>('http://localhost:8081/api/session/', {
+    return api<SessionUserT>(apiBaseUrl + '/session/', {
         method: 'GET',
         credentials: 'include'
     })
