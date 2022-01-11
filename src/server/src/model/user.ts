@@ -1,4 +1,3 @@
-import bcrypt from 'bcrypt';
 import mongoose, {Document, Model, Types} from "mongoose";
 const { model, Schema } = mongoose;
 
@@ -9,9 +8,7 @@ export interface IUser {
     createdAt: Date;
 }
 
-export interface IUserDoc extends IUser, Document<Types.ObjectId> {
-    verifyPassword(password: string): boolean;
-}
+export interface IUserDoc extends IUser, Document<Types.ObjectId> {}
 
 export interface IUserModel extends Model<IUserDoc> {}
 
