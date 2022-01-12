@@ -34,7 +34,8 @@ const UserSchema = new Schema<IUserDoc>({
     }
 })
 
-UserSchema.pre<IUserDoc>('save', function (next) {
+UserSchema.pre<IUserDoc>('validate', function (next) {
+    console.log('pre save')
     if (!this.createdAt) this.createdAt = new Date();
     next();
 })

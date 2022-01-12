@@ -1,10 +1,11 @@
-import express from 'express';
+import express, {RequestHandler, ErrorRequestHandler} from 'express';
 import mongoose, { ConnectOptions } from 'mongoose';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
-import { userRoutes, sessionRouter, seedRouter, postRouter, staticRouter } from './routes/index.js';
+import { userRoutes, postRouter, staticRouter } from './routes/index.js';
 import { PORT, MONGO_URI, MONGO_PORT, SESS_LIFETIME, SESS_NAME, SESS_SECRET, NODE_ENV } from './utils/config.js'
 import auth from './utils/auth.js';
+import {errorHandler} from "./utils/helpers.js";
 
 const mongoUrl = `${MONGO_URI}${MONGO_PORT}`;
 
@@ -43,9 +44,9 @@ const mongoUrl = `${MONGO_URI}${MONGO_PORT}`;
         app.use('/static', staticRouter)
         app.use('/api', apiRouter);
         apiRouter.use('/user', userRoutes);
-        apiRouter.use('/session', sessionRouter);
-        apiRouter.use('/seed', seedRouter)
         apiRouter.use('/post', postRouter)
+
+        app.use(errorHandler);
 
 
         app.listen(PORT, () => console.log(`Listening on port ${PORT}`));

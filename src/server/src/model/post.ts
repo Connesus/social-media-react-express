@@ -81,4 +81,4 @@ PostSchema.index({repostOf: 1});
 PostSchema.index({replyTo: 1});
 PostSchema.index({user: 1});
 
-export const Post = model<IUserDoc, IPostModel>('posts', PostSchema, 'posts');
+export const Post = model<IPostDoc, IPostModel>('posts', PostSchema, 'posts');

@@ -11,6 +11,7 @@ interface IAuthentication {
 
 interface IAuthenticationDoc extends IAuthentication, Document<Types.ObjectId> {
   verifyPassword(password: string): boolean;
+  hashAndSetPassword(password: string): void;
 }
 
 export interface IAuthenticationModel extends Model<IAuthenticationDoc> {}
@@ -23,16 +24,17 @@ const AuthenticationSchema = new mongoose.Schema<IAuthenticationDoc, IAuthentica
   user: {
     type: mongoose.SchemaTypes.ObjectId,
     ref: 'users',
-    required: true
+    required: true,
+    unique: true
   }
 });
 
 AuthenticationSchema.methods.verifyPassword = function(password:string) {
-  return bcrypt.compareSync(password, this.secret);
+  return bcrypt.compare(password, this.secret);
 }
 
-AuthenticationSchema.methods.hashAndSetPassword = function(password:string) {
-  this.set('secret', bcrypt.hashSync(password, 10));
+AuthenticationSchema.methods.hashAndSetPassword = async function(password:string) {
+  this.set('secret', await bcrypt.hash(password, 10));
 }
 
 export const Authentication = mongoose.model<IAuthenticationDoc, IAuthenticationModel>('authentications', AuthenticationSchema, 'authentications');
