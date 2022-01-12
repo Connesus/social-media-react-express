@@ -1,21 +1,22 @@
 import { Router } from "express";
 import postController from "../controller/post.js";
 import multer from 'multer';
+import {use} from "../utils/helpers.js";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage })
 
 const postRouter = Router();
 
-postRouter.get('/:id', postController.getPost);
-postRouter.post('/page', postController.getPage);
-postRouter.post('/like', postController.likePost);
-postRouter.post('/create', upload.single('file'), postController.createPost);
-postRouter.post('/user', postController.getUserPosts);
-postRouter.post('/repost', postController.createPost);
-postRouter.post('/replies', postController.getPostReplies)
-postRouter.delete('/delete/:id', postController.deletePostById)
-postRouter.post('/repost/:id', postController.makeRepost)
+postRouter.get('/:id', use(postController.getPost));
+postRouter.post('/page', use(postController.getPage));
+postRouter.post('/like', use(postController.likePost));
+postRouter.post('/create', upload.single('file')), use(postController.createPost);
+postRouter.post('/user', use(postController.getUserPosts));
+postRouter.post('/repost', use(postController.createPost));
+postRouter.post('/replies', use(postController.getPostReplies));
+postRouter.delete('/delete/:id', use(postController.deletePostById));
+postRouter.post('/repost/:id', use(postController.makeRepost));
 
 
 export default postRouter;
