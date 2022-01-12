@@ -26,7 +26,7 @@ const UserSchema = new Schema<IUserDoc>({
     },
     imageId: {
         type: mongoose.Types.ObjectId,
-        ref: 'Image'
+        ref: 'images'
     },
     createdAt: {
         type: Date,
