@@ -1,10 +1,12 @@
 export { };
-import {SessionUserT} from "@shared/types";
-
+import {SchemaDefinition} from "mongoose";
+import {IUserDoc} from "../model/user.js";
 // Session cookie declaration
 declare module 'express-session' {
+
+
     interface SessionData {
-        userData: SessionUserT
+        userData: SchemaDefinition<IUserDoc>
     }
 }
 

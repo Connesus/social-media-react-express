@@ -1,4 +1,4 @@
-import { ImageModel } from '../model/image.js';
+import { Image } from '../model/image.js';
 import { RequestHandler, Request } from "express"
 import {PostService} from "../service/post.js";
 // import {getPostByIdResponseT} from "@shared/types";
@@ -59,7 +59,7 @@ const postController: { [key: string]: RequestHandler } = {
 
             if (req.file) {
             console.log('file')
-            const newImage = new ImageModel({
+            const newImage = new Image({
                 data: req.file.buffer,
                 type: req.file.mimetype,
                 name: req.file.originalname
@@ -76,7 +76,7 @@ const postController: { [key: string]: RequestHandler } = {
             replyTo
         })
         if (replyTo) {
-            const replyToPost = await PostService.replyToPostById(replyTo, post._id);
+            const replyToPost = await PostService.replyToPostById(replyTo, post?._id);
             return res.json({posts: [post, replyToPost]})
         }
 

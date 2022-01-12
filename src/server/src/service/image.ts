@@ -1,8 +1,8 @@
-import {IImage, ImageModel} from "../model/image.js";
+import {IImage, IImageDoc, Image} from "../model/image.js";
 
 export class ImageService {
     static async uploadOneImage() { }
-    static async getImageById(id: IImage['id']) {
-        return ImageModel.findById(id);
+    static async getImageById(id: IImageDoc['_id']) {
+        return Image.findById(id);
     }
 }

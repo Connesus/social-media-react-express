@@ -1,23 +1,20 @@
-import { LikeModel } from '../model/like.js';
+import { Like } from '../model/like.js';
 import {
-    Document,
     MongooseQueryOptions,
     FilterQuery,
-    DocumentDefinition,
     PipelineStage
 } from "mongoose";
 import mongoose from 'mongoose';
-import {IUser, UserCollectionName, UserModel} from "../model/user.js";
-import {IPost, Post} from "../model/post.js";
+import {IUser, IUserDoc, UserCollectionName} from "../model/user.js";
+import {IPost, IPostDoc, Post} from "../model/post.js";
 import {LikeService} from "./like.js";
 import {UserService} from "./user.js";
-const {ObjectId} = mongoose.Types;
 
 
 type getPaginatedPostsOptionsT = {
     // query: FilterQuery<IPost>,
     // prevPosts?: IPost[] | Falsy,
-    id: IPost['id'] | undefined
+    id: IPostDoc['_id'] | undefined
     limit?: number
     userId?: mongoose.Types.ObjectId;
 };
@@ -117,16 +114,9 @@ export class PostService {
     }
 
 
-    static async createPost({ createdAt, author, text, imageId, repostOf, replyTo }: {
-        author: IPost['author'],
-        createdAt?: IPost['createdAt'],
-        text?: IPost['text'],
-        imageId?: IPost['imageId'],
-        repostOf?: IPost['repostOf'],
-        replyTo?: IPost['replyTo']
-    }) {
+    static async createPost({ createdAt, user, text, imageId, repostOf, replyTo }: IPost) {
         console.log(imageId)
-        const newPost = new Post({ author, imageId, createdAt, text, repostOf, replyTo })
+        const newPost = new Post({ user, imageId, createdAt, text, repostOf, replyTo })
         await newPost.save()
       return newPost;
     }
@@ -136,7 +126,7 @@ export class PostService {
     ) {
         const post = await Post.findById(postId);
         if (post == null) return { status: 404, message: 'Couldn\'t delete post: post not found' }
-        if (post.author == userId) {
+        if (post.user == userId) {
             await post.remove();
             return { status: 200, message: 'Post deleted.' }
         }
@@ -144,7 +134,7 @@ export class PostService {
 
     }
 
-    static async likePost(id: string, userId: IUser['_id']) {
+    static async likePost(id: string, userId: IUserDoc['_id']) {
       console.log(id, userId)
       const postObjId = new mongoose.Types.ObjectId(id)
       const userObjId = new mongoose.Types.ObjectId(userId)
@@ -156,10 +146,10 @@ export class PostService {
           console.log('remove like');
           await Post.findByIdAndUpdate(id, { '$pull': { 'likes': userObjId } });
           // await prevLike[0].remove();
-          await LikeModel.deleteOne({_id: prevLike[0]._id})
+          await Like.deleteOne({_id: prevLike[0]._id})
         } else {
           console.log('add like');
-          const newLike = new LikeModel({ postId: postObjId, userId: userObjId })
+          const newLike = new Like({ postId: postObjId, userId: userObjId })
           await newLike.save();
           await Post.findByIdAndUpdate(id, { "$push": { 'likes': userObjId } })
         }

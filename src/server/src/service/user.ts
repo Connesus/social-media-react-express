@@ -1,13 +1,12 @@
-import {IUser, IUserDef, UserModel} from "../model/user.js";
+import {IUser,User} from "../model/user.js";
 import {UserLoginDataT} from "@shared/types";
-import {ObjectId} from "mongoose";
 import mongoose from "mongoose";
 
 
 
 export class UserService {
   static async getUsersById(ids: mongoose.Types.ObjectId[], showEmail = false) {
-    return UserModel.aggregate([
+    return User.aggregate([
       {$match: {_id: {$in: ids}}},
       {$project: {__v: 0, password: 0}},
       {$project: {email: showEmail ? 1 : 0}}
@@ -15,14 +14,14 @@ export class UserService {
   }
 
   static async getUserByUsername(username: string) {
-    return await UserModel.findOne({'username': username})
+    return await User.findOne({'username': username})
       .catch((error: Error) => {
         console.error(error);
         return error;
       });
   }
-  static async createUser (userData: IUserDef) {
-    return await UserModel.create(userData);
+  static async createUser (userData: IUser) {
+    return await User.create(userData);
   }
   // static generateUserLoginFilter (login: UserLoginDataT['login']) {
   //   try {
