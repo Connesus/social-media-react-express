@@ -12,7 +12,7 @@ export interface IImageDoc extends IImage, Document<Types.ObjectId> {}
 export interface IImageModel extends Model<IImageDoc> {}
 
 
-const ImageSchema = new Schema<IImageDoc>({
+const ImageSchema = new Schema<IImageDoc, IImageModel>({
     data: { type: Buffer, required: true },
     mime: { type: Schema.Types.String, required: true },
     name: { type: Schema.Types.String, required: true },

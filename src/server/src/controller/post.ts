@@ -4,159 +4,215 @@ import {PostService} from "../service/post.js";
 // import {getPostByIdResponseT} from "@shared/types";
 import mongoose from "mongoose";
 import {UserService} from "../service/user.js";
-import {Post} from "../model/post.js";
+import {IPost, IPostDoc, Post} from "../model/post.js";
+import {parseIdStr} from "../utils/helpers.js";
+import {Like} from "../model/like.js";
+import {User} from "../model/user.js";
 
 interface createPostRequest extends Request {
     file: Express.Multer.File
 }
 
 const postController: { [key: string]: RequestHandler } = {
-    getPage: async (req, res) => {
-        // const { id } = req.body;
-        const id = new mongoose.Types.ObjectId(req.body.id);
+    paginateFeed: async (req, res) => {
+        const anchor = parseIdStr(req.body.anchor);
+        const prev = Boolean(req.body.prev)
+        const userId = parseIdStr(req?.session?.userData?._id);
 
-        console.log('id', id)
-        console.log('body', req.body);
-        const userId = new mongoose.Types.ObjectId(req.session?.userData?.id);
-        const posts = await PostService.getPaginatedPosts({ id, userId }) || [];
+        const feedPosts = await PostService.paginatePosts({}, {_id: -1}, anchor, prev)
 
-        const userIds = posts.map(post => new mongoose.Types.ObjectId(post.author));
-        const users = await UserService.getUsersById(userIds) || [];
-        return res.json({posts, users})
+        if (userId) {
+            await Promise.all(feedPosts.map((post: IPostDoc) => post.populateUserActions(userId)))
+        }
+        return res.json(feedPosts);
+    },
+
+    paginateReplies: async (req, res) => {
+        const postId = parseIdStr(req.body.postId);
+        const anchor = parseIdStr(req.body.anchor);
+        const prev = Boolean(req.body.prev)
+        const userId = parseIdStr(req?.session?.userData?._id);
+
+        if (postId) {
+            const replies = await PostService.paginatePosts({replyTo: postId}, {_id: -1}, anchor, prev)
+
+            if (userId) {
+                await Promise.all(replies.map((post: IPostDoc) => post.populateUserActions(userId)))
+            }
+            return res.json(replies)
+        }
+        throw new Error('Post id undefined')
+    },
+    paginateProfile: async (req, res) => {
+        const username = String(req.body.username);
+        let profileId = parseIdStr(req.body.userId);
+        const anchor = parseIdStr(req.body.anchor);
+        const prev = Boolean(req.body.prev)
+        const userId = parseIdStr(req?.session?.userData?._id);
+
+        if (!profileId && !username) throw new Error('Profile: Invalid request arguments');
+        if (!profileId && username) {
+            const user = await User.findOne({username})
+            if (!user) throw new Error('Profile: Invalid request arguments');
+            profileId = user._id;
+        }
+
+        const profilePosts = await PostService.paginatePosts({user: profileId}, {_id: -1}, anchor, prev)
+
+        if (userId) {
+            await Promise.all(profilePosts.map((post: IPostDoc) => post.populateUserActions(userId)))
+        }
+        return res.json(profilePosts)
+    },
+    paginateSearch: async (req, res) => {
+        const text = String(req.body.text);
+        const anchor = parseIdStr(req.body.anchor);
+        const prev = Boolean(req.body.prev)
+        const userId = parseIdStr(req?.session?.userData?._id);
+
+        if (text) {
+            const foundPosts = await PostService.paginatePosts(
+              { $text : { $search : text }},
+              {_id: -1},
+              anchor,
+              prev
+            )
+
+            if (userId) {
+                await Promise.all(foundPosts.map((post: IPostDoc) => post.populateUserActions(userId)))
+            }
+            return res.json(foundPosts)
+        }
+        throw new Error('Search: Post text not found.')
     },
     getPost: async (req, res) => {
-        const ids = [ new mongoose.Types.ObjectId(req.params.id) ]
-        const posts = await PostService.findPostsById(
-          ids,
-          new mongoose.Types.ObjectId(req.session?.userData?.id),
-          Boolean(req.query.postsOnly)
-        ) || [];
+        const id = parseIdStr(req.params.id);
+        const userId = parseIdStr(req?.session?.userData?._id);
 
-        const userIds = posts.map(post => new mongoose.Types.ObjectId(post.author));
-        const users = await UserService.getUsersById(userIds) || []
-        return res.json({posts, users})
-        // const data: getPostByIdResponseT = await PostService.findPostById([req.params.id], req.session?.userData?.id)
-        // res.json(data);
+        if (id) {
+            const post = await Post.findById(id).populateCount();
+            if (!post) throw new Error('Post not found');
+            post.populateUserActions(userId);
+            const posts = [post];
+
+            const user = await User.findById(post.user);
+            if (!user) throw new Error('Post author not found');
+            const users = [user]
+
+            return res.json({posts, users})
+        }
+        throw new Error('Invalid post id');
     },
     likePost: async (req, res) => {
-        const { id } = req.body;
-        const userId = req.session?.userData?.id;
-        await PostService.likePost(id, userId);
-        const updatedPost = await PostService.findPostsById(
-          [new mongoose.Types.ObjectId(id)], new mongoose.Types.ObjectId(userId))
-        return res.json({posts: updatedPost})
+        const id = parseIdStr(req.body.id);
+        const userId = parseIdStr(req?.session?.userData?._id);
+
+        if (id && userId) {
+            const postExists = await Post.exists({_id: id});
+
+            if (postExists) {
+                const likeExists = await Like.exists({postId: id, userId});
+
+                if (likeExists) {
+                    await Like.deleteOne({postId: id, userId})
+                } else {
+                    await Like.create({postId: id, userId})
+                }
+
+                const updatedPost = await Post.findById(id).populateCount();
+                await updatedPost.populateUserActions(userId);
+                return res.json({posts: [updatedPost]})
+            }
+            throw new Error('Post doesn\'t exist');
+        }
+        throw new Error('Post like invalid arguments');
     },
-    // @ts-ignore
-    createPost: async (req: createPostRequest, res) => {
+    createPost: async (req, res) => {
         let imageId;
-        const replyTo = req.body.replyTo && new mongoose.Types.ObjectId(req.body.replyTo);
-        const text = req.body.text;
-        const userId = req?.session?.userData?.id && new mongoose.Types.ObjectId(req?.session?.userData?.id);
+        const replyTo = parseIdStr(req.body.replyTo);
+        const text = String(req.body.text);
+        const user = parseIdStr(req?.session?.userData?._id);
 
-        console.log('replyTo', replyTo);
-
-        if (userId && req?.session?.userData?.id && (text || req.file)) {
-
+        if (user && (text || req.file)) {
             if (req.file) {
-            console.log('file')
-            const newImage = new Image({
-                data: req.file.buffer,
-                type: req.file.mimetype,
-                name: req.file.originalname
-            });
-            await newImage.save();
-            imageId = newImage.id;
-        }
-        console.log(imageId ? `file: ${imageId}` : 'No image');
-        console.log(req.body.text)
-        const post = await PostService.createPost({
-            text,
-            imageId,
-            author: new mongoose.Types.ObjectId(userId),
-            replyTo
-        })
-        if (replyTo) {
-            const replyToPost = await PostService.replyToPostById(replyTo, post?._id);
-            return res.json({posts: [post, replyToPost]})
-        }
+                const newImage = new Image({
+                    data: req.file.buffer,
+                    mime: req.file.mimetype,
+                    name: req.file.originalname
+                });
+                await newImage.save();
+                imageId = newImage._id;
+            }
 
-        return res.json({posts: [post]})
+            const post = await Post.create({user, text, replyTo, imageId})
+            return res.json({posts: [post]})
         }
-        return res.json({error: 'Wrong post data'})
+        throw new Error('Error: Post data issue')
     },
     getUserPosts: async (req, res) => {
-        const {username} = req.body;
-        const result = await PostService.getUserPostsByUsername(username, req?.session?.userData?.id);
-        res.json(result);
-    },
+        const username = String(req.body.username);
+        const userId = parseIdStr(req?.session?.userData?._id);
 
-    getPostReplies: async (req, res) => {
-        const postId = req.body.id;
-        const userId = req.session.userData?.id
-        console.log('zull')
-        if (userId && postId) {
-            const postObjId = new mongoose.Types.ObjectId(postId)
-            const userObjId = new mongoose.Types.ObjectId(userId)
-            const post = await Post.findById(postObjId, {likes: 0, reposts: 0})
-            console.log(post)
-            if (post && post.replies) {
-                console.log(post.replies)
-                const results = await PostService.findPostsById([ ...post.replies], userObjId);
-                return res.json({posts: [...results, post]});
-            }
-            return res.end('No replies')
+        const user = await User.findOne({username});
+        if (!user) throw new Error('User not found');
+
+        const posts = await Post.find({user: user._id}).populateCount();
+        if (!posts) throw new Error('Error when searching for user posts');
+
+        if (userId) {
+            await Promise.all(posts.map((post: IPostDoc) => post.populateUserActions(userId)))
         }
-        return res.json({error: 'Invalid ids'})
+
+        res.json({users: [user], posts})
     },
 
     deletePostById: async (req, res) => {
-        const postId = req.params.id;
-        const userId = req.session.userData?.id
+        const postId = parseIdStr(req.params.id);
+        const userId = parseIdStr(req.session.userData?._id);
+
+        console.log('postId', postId);
+        console.log('userId', userId)
 
         if (userId && postId) {
-            const postObjId = new mongoose.Types.ObjectId(postId);
-            const userObjId = new mongoose.Types.ObjectId(userId);
-            const post = await Post.findById(postObjId);
+            const post = await Post.findById(postId);
 
-            if (post && post.author.equals(userObjId)) {
-                await Post.deleteOne(({_id: postObjId}));
-                return res.status(200).end()
+            if (post && post?.user?.toString() == userId.toString()) {
+                if (post.imageId) {
+                    await Image.deleteOne({_id: post.imageId});
+                }
+                await Like.deleteMany({postId});
+                await Post.deleteMany({replyTo: postId});
+                await Post.deleteMany({repostOf: postId});
+                await post.remove()
+
+                return res.json(post);
             }
         }
-        return res.status(500).json({error: 'DELETE: Invalid request'})
+        throw new Error('Delete Post: Invalid request data');
     },
 
     makeRepost: async (req, res) => {
-        const postId = req.params.id;
-        const userId = req.session.userData?.id
+        const postId = parseIdStr(req.params.id);
+        const userId = parseIdStr(req.session.userData?._id)
 
         if (postId && userId) {
-            const postObjId = new mongoose.Types.ObjectId(postId);
-            const userObjId = new mongoose.Types.ObjectId(userId);
+            const repostPost = await Post.findById(postId);
+            if (!repostPost) throw new Error('Couldn\'t find post to repost');
 
-            const newPostId = await PostService.repostPost(postObjId, userObjId);
-            const postIds = newPostId ? [newPostId, postObjId] : [postObjId]
-            console.log('newPostId', newPostId)
-            const posts = await PostService.findPostsById(postIds, userObjId)
-            return res.json({posts})
+            const repostExists = await Post.exists({repostOf: postId, user: userId});
+            if (repostExists) {
+                await Post.deleteOne({repostOf: postId, user: userId});
+            } else {
+                await Post.create({user: userId, repostOf: postId});
+            }
+
+            const updatedPost = await Post.findById(postId).populateCount();
+            await updatedPost.populateUserActions(userId);
+
+            return res.json({posts: [updatedPost]})
         }
-        return res.status(500).json('Error while trying to repost')
+        throw new Error('Repost: Invalid request arguments')
     }
-
-    // repost: async (req, res) => {
-    //     const {id} = req.body;
-    //     const userId = req.session.userData?.id;
-    //
-    //     if (id && userId) {
-    //         const repostPost = await Post.findById(id);
-    //         const post = await Post.create({author: userId, repostOf: id})
-    //         // await Post.findOneAndUpdate({_id: id}, {})
-    //         await Post.findByIdAndUpdate(id, { '$pull': { 'likes': userObjId } });
-    //
-    //
-    //         return res.json({error: 'Invalid arguments'})
-    //     }
-    // }
 }
 
 export default postController;
