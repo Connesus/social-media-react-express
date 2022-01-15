@@ -17,10 +17,8 @@ export const Feed: React.FC = () => {
   }, [feedPostIds])
 
   const handleLoadMoreButton = useCallback(() => {
-    console.log('fetch more feed posts')
-    const lastFeedId = feedPostIds[feedPostIds.length - 1];
-    console.log(lastFeedId)
-    dispatch(fetchMoreFeedPosts(lastFeedId))
+    const anchorPost = feedPostIds[feedPostIds.length - 1];
+    dispatch(fetchMoreFeedPosts(anchorPost))
   }, [feedPostIds])
 
   return (

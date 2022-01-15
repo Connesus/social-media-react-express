@@ -22,6 +22,7 @@ const {baseUrl} = clientConfig;
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import {DotsIcon} from "./icons/Dots";
+import {PostReplies} from "./PostReplies";
 
 const formatPostDate = (date: Date) => `${date.getDay()}.${date.getMonth()}.${date.getFullYear()}`;
 
@@ -37,7 +38,7 @@ export const Post: React.FC<{id?: string, authorId?: string, showReplies?: boole
     if (id) {
       const post = selectPostState.selectById(state, id);
       if (post) {
-        const author = selectUserState.selectById(state, post.author);
+        const author = selectUserState.selectById(state, post.user);
         return {post, author}
     }}
     return {}
@@ -55,9 +56,9 @@ export const Post: React.FC<{id?: string, authorId?: string, showReplies?: boole
       if (post.createdAt) {
         setFormattedCreatedAt(formatPostDate(new Date(post.createdAt)))
       }
-      if (showReplies && post._id && !post.replies) {
-        dispatch(fetchPostReplies(post._id));
-      }
+      // if (showReplies && post._id && !post.replies) {
+      //   dispatch(fetchPostReplies(post._id));
+      // }
     }
   }, [post])
 
@@ -80,7 +81,7 @@ export const Post: React.FC<{id?: string, authorId?: string, showReplies?: boole
   }, [id])
 
   const handleDeletePostButton = useCallback(() => {
-    if (post && post.author && authData.id) {
+    if (post && post.user && authData._id) {
       dispatch(deletePostAction(post._id))
     }
   }, [post, authData])
@@ -97,7 +98,7 @@ export const Post: React.FC<{id?: string, authorId?: string, showReplies?: boole
               <span className={style["PostContainer__header-username"]}>{author.username}</span>
             <h6 className={style['PostContainer__header-date']}>{formattedCreatedAt}</h6>
             </Link>
-            {post?.author === authData.id &&
+            {post?.user === authData._id &&
             <Popup
               trigger={
                 <div className={style["PostContainer__header-popup-container"]}>
@@ -133,21 +134,21 @@ export const Post: React.FC<{id?: string, authorId?: string, showReplies?: boole
 
           <button onClick={handleReplyButton} className={style["PostContainer__content-interaction-reply"]}>
             <CommentIcon color='black' width='20px' height='20px'/>
-            <span>{post?.counter.replyCount}</span>
+            <span>{post?.replyCount}</span>
           </button>
 
           <button onClick={handleRepostButton} className={style["PostContainer__content-interaction-repost"]}>
-              <RepostIcon width='24px' height='24px' color={post?.user?.hasReposted ? 'blue' : 'black'}/>
-              <span>{post?.counter.repostCount}</span>
+              <RepostIcon width='24px' height='24px' color={post?.hasReposted ? 'blue' : 'black'}/>
+              <span>{post?.repostCount}</span>
           </button>
 
           <button onClick={handleLikeButton} className={style["PostContainer__content-interaction-like"]}>
-            <LikeIcon width='20px' height='20px' color={post?.user?.hasLiked ? 'red' : 'black'}/>
-            <span>{post?.counter.likeCount}</span>
+            <LikeIcon width='20px' height='20px' color={post?.hasLiked ? 'red' : 'black'}/>
+            <span>{post?.likeCount}</span>
           </button>
         </div>
         {showCreateReply && <CreatePost replyTo={id} />}
-        {(showReplies && post?.replies) &&  post.replies.map(id => <Post id={id} key={id} />)}
+        {(showReplies && id && <PostReplies postId={id} />)}
       </div>
     </div> : <><h3>Loading</h3></>);
 });

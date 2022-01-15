@@ -30,7 +30,6 @@ const LoginPage = React.memo( () => {
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-    console.log(usernameRef);
     if (usernameRef.current && passwordRef.current) {
       dispatch(loginUser({
         password: passwordRef.current.value,
