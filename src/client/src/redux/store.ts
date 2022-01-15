@@ -6,6 +6,8 @@ import requestReducer from './slice/requests'
 import authReducer from './slice/auth'
 import postReducer from './slice/posts'
 import userReducer from './slice/users'
+import chatReducer from './slice/chat'
+import {chatMiddleware} from "./utils";
 
 const sagaMiddleware = createSagaMiddleware()
 
@@ -15,9 +17,10 @@ export const store = configureStore({
         post: postReducer,
         request: requestReducer,
         auth: authReducer,
-        user: userReducer
+        user: userReducer,
+        chat: chatReducer,
     },
-    middleware: [sagaMiddleware],
+    middleware: [sagaMiddleware, chatMiddleware],
     devTools: true
 })
 
