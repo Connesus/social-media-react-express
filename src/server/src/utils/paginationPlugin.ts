@@ -17,20 +17,17 @@ export interface pluginModel {
 export default function paginationPlugin(schema: Schema, options: SchemaOptions) {
   schema.statics.firstPage = function ({filter, orderBy = '_id', sort, limit = 10}: TPaginationOptions) {
     return this
-      .find({...filter })
-      .sort()
+      .find({...filter },{} , {sort})
       .limit(limit)
   }
   schema.statics.nextPage = function ({filter, orderBy = '_id', sort, limit = 10, anchor}: TPaginationOptions) {
     return this
-      .find({...filter, [orderBy]: { $lt: anchor} })
-      .sort(sort)
+      .find({...filter, [orderBy]: { $lt: anchor} }, {}, {sort})
       .limit(limit)
   }
   schema.statics.prevPage = function ({filter, orderBy = '_id', sort, limit = 10, anchor}: TPaginationOptions) {
     return this
-      .find({...filter, [orderBy]: { $gt: anchor} })
-      .sort(sort)
+      .find({...filter, [orderBy]: { $gt: anchor} }, {}, {sort})
       .limit(limit)
   }
 }
