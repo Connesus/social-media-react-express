@@ -30,7 +30,8 @@ const UserSchema = new Schema<IUserDoc>({
     },
     createdAt: {
         type: Date,
-        required: true
+        required: true,
+        default: () => new Date()
     }
 })
 

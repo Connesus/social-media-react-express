@@ -32,7 +32,8 @@ const MessageSchema = new Schema<IMessageDoc, IMessageModel>({
   },
   createdAt: {
     type: Date,
-    required: true
+    required: true,
+    default: () => new Date()
   },
   seen: Boolean
 })
