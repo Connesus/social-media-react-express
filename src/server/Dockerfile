@@ -25,6 +25,7 @@ COPY ./server/src ./src
 COPY ./shared ../shared
 
 #RUN npm i -g concurrently tsc tsc-alias
+RUN chown -R node:node "/home/node/"
 RUN npm install npm@latest -g
 RUN npm ci
 #&& npm cache clean --force

@@ -5,12 +5,8 @@ import mongoose from "mongoose";
 
 
 export class UserService {
-  static async getUsersById(ids: mongoose.Types.ObjectId[], showEmail = false) {
-    return User.aggregate([
-      {$match: {_id: {$in: ids}}},
-      {$project: {__v: 0, password: 0}},
-      {$project: {email: showEmail ? 1 : 0}}
-    ])
+  static async getUsersById(ids: mongoose.Types.ObjectId[]) {
+    return await User.find({_id: {$in: ids}});
   }
 
   static async getUserByUsername(username: string) {
@@ -36,17 +32,4 @@ export class UserService {
   //     console.log('bruh')
   //   }
   // }
-  static async getUserLogin ({password, username}: UserLoginDataT) {
-    const user = await UserService.getUserByUsername(username);
-
-    if (user instanceof Error) {
-      return user;
-    }
-
-    if (user && user.password === password) {
-      return user;
-    }
-
-    return new Error('ERROR: Login error')
-  }
 }
