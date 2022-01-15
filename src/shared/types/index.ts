@@ -1,19 +1,24 @@
 export interface IUser {
   _id: string;
   username: string;
+  description?: string
   imageId?: string;
+  createdAt: Date;
 }
 
 export interface IPost {
   _id: string;
-  author: IUser['_id'];
-  user?: PostUserDataT;
-  counter: PostCounterT;
-  text?: string;
-  imageId?: string;
-  contentType: "text" | "image" | 'mixed';
+  user: string;
   createdAt: Date;
-  replies?: string[];
+  imageId?: string;
+  text?: string;
+  replyTo?: string;
+  repostOf?: string;
+  replyCount?: number;
+  repostCount?: number;
+  likeCount?: number;
+  hasReposted?: boolean;
+  hasLiked?: boolean;
 }
 
 export type PostUserDataT = {
@@ -51,10 +56,8 @@ export type UserLoginDataT = {
 // type PostContentTypes = keyof PostContentMap;
 
 
-export interface SessionUserT {
-  id: string,
-  username: string
-  role?: 'user' | 'admin'
+export interface SessionUserT extends IUser {
+  role?: 'user' | 'admin' | 'guest'
 }
 
 export type getPostsResponseT = {

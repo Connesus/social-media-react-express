@@ -11,7 +11,8 @@ const postAdapter = createEntityAdapter<IPost>({
 
 interface additionalState {
   feedIds: string[],
-  profileIds: string[]
+  profileIds: string[],
+  searchIds: string[]
 }
 
 export const userSlice = createSlice({
@@ -19,8 +20,12 @@ export const userSlice = createSlice({
   initialState: postAdapter.getInitialState<additionalState>({
     feedIds: [],
     profileIds: [],
+    searchIds: [],
   }),
   reducers: {
+    setSearchIds: ((state, action) => {
+      state.searchIds = action.payload
+    }),
     setPost: postAdapter.setOne,
     setManyPosts: postAdapter.setMany,
     upsertManyPosts: postAdapter.upsertMany,
@@ -35,7 +40,7 @@ export const userSlice = createSlice({
   }
 })
 
-export const {setPost, setManyPosts, addToFeed, addToProfileIds, upsertManyPosts, clearProfileIds, deleteOnePost} = userSlice.actions;
+export const {setPost, setManyPosts, addToFeed, setSearchIds, addToProfileIds, upsertManyPosts, clearProfileIds, deleteOnePost} = userSlice.actions;
 
 export const fetchPostById = createAction<{postId: string, reqId: string}>('fetchPostById');
 export const fetchMoreFeedPosts = createAction<string | undefined>('fetchMoreFeedPosts');
@@ -46,6 +51,8 @@ export const replyToPostAction = createAction<FormData>('replyToPostAction');
 export const fetchPostReplies = createAction<string>('fetchPostReplies');
 export const deletePostAction = createAction<string>('deletePostAction');
 export const repostPostAction = createAction<string>('repostPostAction');
+export const searchPosts = createAction<string>('searchPosts');
+
 
 export const fetchMoreFeedPostsRequestActions =
   createRequestAction(fetchMoreFeedPosts.type);

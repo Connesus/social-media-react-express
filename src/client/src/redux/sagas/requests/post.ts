@@ -3,12 +3,12 @@ import {getPostsResponseT, IPost, IUser} from "@shared/types";
 import * as clientConfig from '../../../clientConfig.json';
 const {apiBaseUrl} = clientConfig;
 
-export function requestLoadMorePosts(id: string | undefined) {
-    return api<getPostsResponseT>(apiBaseUrl + '/post/page', {
+export function requestLoadMorePosts(anchor: string | undefined) {
+    return api<getPostsResponseT>(apiBaseUrl + '/post/paginate/feed', {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({id})
+    body: JSON.stringify({anchor})
   });
 }
 
@@ -29,7 +29,7 @@ export function requestLikePost(id: string) {
 }
 
 export function requestFetchUserPosts(username: string) {
-  return api<getPostsResponseT>(apiBaseUrl + '/post/user', {
+  return api<getPostsResponseT>(apiBaseUrl + '/post/paginate/profile', {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -65,5 +65,14 @@ export function requestRepost(id: string) {
   return api<getPostsResponseT>(apiBaseUrl+'/post/repost/'+id, {
     method: 'POST',
     credentials: 'include'
+  })
+}
+
+export function requestSearchPost(text: string) {
+  return api<getPostsResponseT>(apiBaseUrl + '/post/paginate/search', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({text})
   })
 }

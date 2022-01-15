@@ -1,6 +1,6 @@
-import {createEntityAdapter, createSlice} from "@reduxjs/toolkit";
+import {createAction, createEntityAdapter, createSlice} from "@reduxjs/toolkit";
 import {IUser} from "@shared/types";
-import {RootState} from "../store.js";
+import {RootState} from "../store";
 
 
 
@@ -16,6 +16,9 @@ export const userSlice = createSlice({
     setManyUsers: userAdapter.setMany
   }
 })
+
+export const fetchUserById = createAction<string>('fetchUserById');
+export const fetchAllChatMessages = createAction<string>('fetchAllChatMessages');
 
 export const {setManyUsers, setUser} = userSlice.actions;
 export default userSlice.reducer;

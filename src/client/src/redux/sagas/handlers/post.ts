@@ -4,7 +4,7 @@ import {
   requestFetchUserPosts,
   requestGetPostById,
   requestLikePost,
-  requestLoadMorePosts, requestRepost
+  requestLoadMorePosts, requestRepost, requestSearchPost,
 } from "../requests/post";
 // import {addPostsToFeed, mergePostsById, getPostByIdRequestActions,} from '../../slice/post'
 import {setManyUsers} from '../../slice/users'
@@ -16,7 +16,8 @@ import {
   addToFeed,
   addToProfileIds,
   upsertManyPosts,
-  deleteOnePost
+  deleteOnePost,
+  setSearchIds
 } from "../../slice/posts";
 import { StrictEffect } from '@redux-saga/types';
 import {Simulate} from "react-dom/test-utils";
@@ -42,7 +43,6 @@ export function* handleGetPostById({payload}: PayloadAction<{postId: string; req
   const {postId, reqId} = payload;
   try {
     yield put(fetchPostByIdRequestActions.Request(reqId));
-    console.log('reqyu', reqId)
     const response: getPostsResponseT = yield call(requestGetPostById, postId);
 
     yield put(setManyPosts(response.posts))
@@ -153,3 +153,22 @@ export function* handleRepost(action: PayloadAction<string>): Generator<any, any
   }
 }
 
+export function* handleSearchPosts(action: PayloadAction<string>): Generator<any, any, getPostsResponseT> {
+  const searchText = action.payload;
+  try {
+    const response: getPostsResponseT = yield call(requestSearchPost, searchText);
+
+    if (response) {
+      if (Array.isArray(response.posts)) {
+        const searchIds = response.posts.map((post => post._id))
+        yield put(setSearchIds(searchIds))
+        yield put(setManyPosts(response.posts))
+      }
+      if (response.users) {
+        yield put(setManyUsers(response.users))
+      }
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}

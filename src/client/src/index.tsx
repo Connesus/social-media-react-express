@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useEffect} from "react"
 import ReactDOM from "react-dom";
 import { store } from "./redux/store";
 import { Provider } from "react-redux";
@@ -22,9 +22,18 @@ import {Register} from "./components/Register";
 import {Feed} from "./components/Feed";
 import {CreatePost} from "./components/CreatePost";
 import './styles/global.module.scss'
+import {chatActions} from "./redux/slice/chat";
+import {MessagesPage} from "./components/MessagesPage";
+
+import './styles/index.module.scss'
+import {ChatPage} from "./components/ChatPage";
+import {SearchPage} from "./components/SearchPage";
+// import '../node_modules/sacura.css/css/sacura.css'
 // import 'destyle.css'
 
 store.dispatch(fetchSessionData());
+store.dispatch(chatActions.startConnecting());
+
 
 ReactDOM.render(
   <React.StrictMode>
@@ -35,6 +44,9 @@ ReactDOM.render(
         <Route path='/post/:postId' element={<Layout><PostPage /></Layout>}/>
         <Route path='/user/:authorId' element={<Layout><ProfilePage /></Layout>}/>
         <Route path='/profile' element={<RequireLogin><Layout><ProfilePage authProfile /></Layout></RequireLogin>}/>
+        <Route path='/messages' element={<Layout><MessagesPage /></Layout>}/>
+        <Route path='/message/:id' element={<Layout><ChatPage /></Layout>}/>
+        <Route path='/search' element={<Layout><SearchPage /></Layout>}/>
         <Route path="/login" element={<Layout><LoginPage /></Layout>} />
         <Route path="/create" element={<RequireLogin><Layout><CreatePost /></Layout></RequireLogin>} />
         <Route path="/register" element={<Layout><Register /></Layout>} />

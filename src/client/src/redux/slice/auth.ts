@@ -1,19 +1,18 @@
 import {createAction, createSlice, PayloadAction} from '@reduxjs/toolkit'
-import {SessionUserT, UserLoginDataT} from "@shared/types";
+import {IUser, SessionUserT, UserLoginDataT} from "@shared/types";
 import {useSelector} from "react-redux";
 import {RootState} from "../store.js";
 
 
-export interface AuthState {
+export interface AuthState extends IUser {
   role: 'guest' | 'user' | 'admin';
-  username: string;
-  id: string;
 }
 
 const initialState: AuthState = {
   role: "guest",
-  id: '',
-  username: ''
+  _id: '',
+  username: '',
+  createdAt: new Date()
 }
 
 export const authSlice = createSlice({

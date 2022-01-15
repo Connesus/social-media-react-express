@@ -1,9 +1,10 @@
 import { call, put } from "@redux-saga/core/effects"
-import { requestCreateUser, requestLoginUser, requestLoginStatus } from "../requests/user";
+import {requestCreateUser, requestLoginUser, requestLoginStatus, requestFetchUserById} from "../requests/user";
 import { PayloadAction } from '@reduxjs/toolkit';
 import { StrictEffect } from '@redux-saga/types';
 import {setLoginData} from '../../slice/auth'
 import {IUser, SessionUserT, UserLoginDataT} from "@shared/types";
+import {setUser} from '../../slice/users'
 
 export function* handleCreateUser(action: PayloadAction<UserLoginDataT>): Generator<StrictEffect, void, SessionUserT> {
     try {
@@ -24,7 +25,7 @@ export function* handleLoginUser(action: PayloadAction<UserLoginDataT>): Generat
         console.log(action.payload)
 
         if (data) {
-            const role = data.role ? data.role : (data.id ? 'user' : 'guest')
+            const role = data.role ? data.role : (data._id ? 'user' : 'guest')
             yield put(setLoginData({...data, role}));
         }
     } catch (error) {
@@ -35,10 +36,21 @@ export function* handleLoginUser(action: PayloadAction<UserLoginDataT>): Generat
 export function* handleLoginStatus(): Generator<StrictEffect, void, SessionUserT> {
     try {
         const data = yield call(requestLoginStatus);
-        console.log(data)
         if (data) {
-            const role = data.role ? data.role : (data.id ? 'user' : 'guest')
+            const role = data.role ? data.role : (data._id ? 'user' : 'guest')
             yield put(setLoginData({...data, role}));
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+export function* handleFetchUserById(action: PayloadAction<string>): Generator<StrictEffect, void, IUser> {
+    try {
+        const data = yield call(requestFetchUserById, action.payload);
+
+        if (data) {
+            yield put(setUser(data));
         }
     } catch (error) {
         console.error(error);

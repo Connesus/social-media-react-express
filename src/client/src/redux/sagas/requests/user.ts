@@ -6,7 +6,7 @@ const {apiBaseUrl} = clientConfig;
 // Implementation code where T is the returned data shape
 
 export function requestCreateUser(newUser: UserLoginDataT) {
-    return api<SessionUserT>(apiBaseUrl + '/user/create', {
+    return api<SessionUserT>(apiBaseUrl + '/user/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newUser),
@@ -16,7 +16,7 @@ export function requestCreateUser(newUser: UserLoginDataT) {
 
 
 export function requestLoginUser(userData: UserLoginDataT) {
-    return api<SessionUserT>(apiBaseUrl + '/session/', {
+    return api<SessionUserT>(apiBaseUrl + '/user/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
@@ -25,8 +25,17 @@ export function requestLoginUser(userData: UserLoginDataT) {
 }
 
 export function requestLoginStatus() {
-    return api<SessionUserT>(apiBaseUrl + '/session/', {
+    return api<SessionUserT>(apiBaseUrl + '/user/check/', {
         method: 'GET',
+        credentials: 'include',
+    })
+}
+
+export function requestFetchUserById(id:string) {
+    return api<SessionUserT>(apiBaseUrl + '/user/id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({id}),
         credentials: 'include'
     })
 }
