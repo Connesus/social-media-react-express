@@ -2,16 +2,11 @@ import { Image } from '../model/image.js';
 import { RequestHandler, Request } from "express"
 import {PostService} from "../service/post.js";
 // import {getPostByIdResponseT} from "@shared/types";
-import mongoose from "mongoose";
-import {UserService} from "../service/user.js";
-import {IPost, IPostDoc, Post} from "../model/post.js";
+import { IPostDoc, Post} from "../model/post.js";
 import {parseIdStr} from "../utils/helpers.js";
 import {Like} from "../model/like.js";
 import {User} from "../model/user.js";
 
-interface createPostRequest extends Request {
-    file: Express.Multer.File
-}
 
 const postController: { [key: string]: RequestHandler } = {
     paginateFeed: async (req, res) => {
@@ -24,7 +19,10 @@ const postController: { [key: string]: RequestHandler } = {
         if (userId) {
             await Promise.all(feedPosts.map((post: IPostDoc) => post.populateUserActions(userId)))
         }
-        return res.json(feedPosts);
+        const userIds = feedPosts.map(post => post.user);
+        const users = await User.find({_id: {$in: userIds}});
+
+        return res.json({posts: feedPosts, users});
     },
 
     paginateReplies: async (req, res) => {
@@ -39,7 +37,11 @@ const postController: { [key: string]: RequestHandler } = {
             if (userId) {
                 await Promise.all(replies.map((post: IPostDoc) => post.populateUserActions(userId)))
             }
-            return res.json(replies)
+
+            const userIds = replies.map(post => post.user);
+            const users = await User.find({_id: {$in: userIds}});
+
+            return res.json({posts: replies, users})
         }
         throw new Error('Post id undefined')
     },
@@ -62,7 +64,11 @@ const postController: { [key: string]: RequestHandler } = {
         if (userId) {
             await Promise.all(profilePosts.map((post: IPostDoc) => post.populateUserActions(userId)))
         }
-        return res.json(profilePosts)
+
+        const userIds = profilePosts.map(post => post.user);
+        const users = await User.find({_id: {$in: userIds}});
+
+        return res.json({posts: profilePosts, users})
     },
     paginateSearch: async (req, res) => {
         const text = String(req.body.text);
@@ -81,7 +87,11 @@ const postController: { [key: string]: RequestHandler } = {
             if (userId) {
                 await Promise.all(foundPosts.map((post: IPostDoc) => post.populateUserActions(userId)))
             }
-            return res.json(foundPosts)
+
+            const userIds = foundPosts.map(post => post.user);
+            const users = await User.find({_id: {$in: userIds}});
+
+            return res.json({posts: foundPosts, users})
         }
         throw new Error('Search: Post text not found.')
     },
