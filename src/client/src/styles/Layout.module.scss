@@ -1,5 +1,5 @@
 .Layout {
-  width: 100vw;
+  //width: 100vw;
   height: 100vh;
   display: flex;
   overflow: hidden;
@@ -9,5 +9,8 @@
     overflow: auto;
     display: flex;
     justify-content: center;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 }
