@@ -8,6 +8,7 @@ import {errorHandler, parseIdStr} from "./utils/helpers.js";
 import {Server} from 'socket.io';
 import {createServer} from "http";
 import cookie from 'cookie';
+// @ts-ignore
 import cookieParser from 'cookie-parser';
 import {User} from "./model/user.js";
 import {Message} from "./model/message.js";
@@ -15,24 +16,35 @@ import {Message} from "./model/message.js";
 const mongoUrl = `${MONGO_URI}${MONGO_PORT}`;
 
 const app = express();
+
+app.set('trust proxy', true);
+
 const server = createServer(app);
-export const io = new Server(server);
+export const io = new Server(server, {
+    path: '/sckt'
+});
 
 
 io.use(async (socket, next) => {
     const sid = cookie.parse(socket.request.headers.cookie || '');
+    console.log(sid)
     if (!sid) return next(Error('Invalid sid'));
     const unsigned = cookieParser.signedCookie(sid.sid, SESS_SECRET);
+    console.log('unsigned', unsigned)
     if (!unsigned) return next(Error('Error with unsigned cookie'));
     const sessionCollection = await mongoose.connection.collection('session');
-    const session = await sessionCollection.findOne({_id: unsigned});
-    if (!session) return next(Error('Session not found'));
-    const sessionData = JSON.parse(session.session);
+    // @ts-ignore
+    const dbSession = await sessionCollection.findOne({_id: unsigned});
+    // @ts-ignore
+    if (!dbSession) return next(Error('Session not found'));
+    // @ts-ignore
+    const sessionData = JSON.parse(dbSession.session);
     const _id = sessionData?.userData?._id;
 
     if (!_id) return next(Error('No user data found'));
 
-    socket.id = _id;
+    // @ts-ignore
+    socket["id"] = _id;
 
     next();
 });
@@ -112,6 +124,7 @@ io.on('connection', async (socket) =>  {
             secret: SESS_SECRET as string,
             resave: false,
             saveUninitialized: true,
+            proxy: true,
             store: MongoStore.create({
                 // @ts-ignore
                 client: dbClient,
@@ -120,9 +133,11 @@ io.on('connection', async (socket) =>  {
                 ttl: parseInt(SESS_LIFETIME as string) / 1000, // 1 Day
             }),
             cookie: {
-                sameSite: true,
-                secure: NODE_ENV === 'production',
-                maxAge: parseInt(SESS_LIFETIME as string)
+                sameSite: "none",
+                secure: true,
+                maxAge: parseInt(SESS_LIFETIME as string),
+                path: '/',
+                httpOnly: false,
             }
         }))
 
