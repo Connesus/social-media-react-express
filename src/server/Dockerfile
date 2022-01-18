@@ -26,14 +26,12 @@ COPY ./shared ../shared
 
 #RUN npm i -g concurrently tsc tsc-alias
 RUN chown -R node:node "/home/node/"
-RUN npm install npm@latest -g
-RUN npm ci
+RUN npm i
 #&& npm cache clean --force
 
 #COPY ./server ./
-
+EXPOSE $PORT
 
 #RUN chown -R node:node "/home/node/app/"
 RUN chown -R node:node "/root/.npm/"
 USER node
-CMD ["npm", "run", "dev"]
