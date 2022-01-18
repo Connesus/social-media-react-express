@@ -1,12 +1,10 @@
 import {api} from "./utils";
 import {IUser, SessionUserT, UserLoginDataT} from "@shared/types";
-import * as clientConfig from '../../../clientConfig.json';
-const {apiBaseUrl} = clientConfig;
 
 // Implementation code where T is the returned data shape
 
 export function requestCreateUser(newUser: UserLoginDataT) {
-    return api<SessionUserT>(apiBaseUrl + '/user/register', {
+    return api<SessionUserT>(process.env.BACKEND_API_URL + '/user/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newUser),
@@ -16,7 +14,7 @@ export function requestCreateUser(newUser: UserLoginDataT) {
 
 
 export function requestLoginUser(userData: UserLoginDataT) {
-    return api<SessionUserT>(apiBaseUrl + '/user/login', {
+    return api<SessionUserT>(process.env.BACKEND_API_URL + '/user/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
@@ -25,14 +23,14 @@ export function requestLoginUser(userData: UserLoginDataT) {
 }
 
 export function requestLoginStatus() {
-    return api<SessionUserT>(apiBaseUrl + '/user/check/', {
+    return api<SessionUserT>(process.env.BACKEND_API_URL + '/user/check/', {
         method: 'GET',
         credentials: 'include',
     })
 }
 
 export function requestFetchUserById(id:string) {
-    return api<SessionUserT>(apiBaseUrl + '/user/id', {
+    return api<SessionUserT>(process.env.BACKEND_API_URL + '/user/id', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({id}),

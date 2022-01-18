@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-import {apiBaseUrl} from '../clientConfig.json';
 import {useDispatch} from "react-redux";
 import {setManyPosts} from '../redux/slice/posts'
 import {setManyUsers} from '../redux/slice/users'
@@ -12,7 +11,7 @@ export const PostReplies: React.FC<{postId: string, anchor?: string}> = ({postId
   const [replyIds, setReplyIds] = useState<string[]>([]);
 
   useEffect(() => {
-    fetch(`${apiBaseUrl}/post/paginate/replies`,{
+    fetch(`${process.env.BACKEND_API_URL}/post/paginate/replies`,{
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },

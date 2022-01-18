@@ -79,16 +79,16 @@ export const chatMiddleware: Middleware = store => {
 
   return next => action => {
     const isConnectionEstablished = socket && store.getState().chat.isConnected;
-    console.log(isConnectionEstablished)
 
     if (chatActions.startConnecting.match(action)) {
-      socket = io('http://localhost:8081', {
+      socket = io(process.env.BACKEND_URL as string, {
         withCredentials: true,
+        path: '/sckt'
       });
 
       socket.on('connect', () => {
         store.dispatch(chatActions.connectionEstablished())
-        // store.dispatch(chatActions.fetchAllChats());
+
         while (fnQueue.length > 0) {
           // @ts-ignore
           (fnQueue.shift())(socket, store);
