@@ -1,0 +1,40 @@
+.ProfilePage {
+  width: 100%;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    @media screen and (max-width: 684px) {
+      flex-direction: column;
+    }
+
+    &-content {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      gap: 16px;
+
+      @media screen and (max-width: 684px) {
+        flex-direction: column;
+      }
+    }
+
+    &-username {
+      margin: 0;
+    }
+
+    &-message {
+      &-container {
+        padding: 16px 16px 16px 0;
+        align-self: start;
+
+        @media screen and (max-width: 684px) {
+          align-self: center;
+          padding-right: 0;
+        }
+      }
+    }
+  }
+}
