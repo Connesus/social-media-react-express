@@ -43,9 +43,8 @@ ReactDOM.render(
         {/*<Route path="/" element={<RequireLogin><Layout><Feed/></Layout></RequireLogin>} />*/}
         <Route path='/post/:postId' element={<Layout><PostPage /></Layout>}/>
         <Route path='/user/:authorId' element={<Layout><ProfilePage /></Layout>}/>
-        <Route path='/profile' element={<RequireLogin><Layout><ProfilePage authProfile /></Layout></RequireLogin>}/>
-        <Route path='/messages' element={<Layout><MessagesPage /></Layout>}/>
-        <Route path='/message/:id' element={<Layout><ChatPage /></Layout>}/>
+        <Route path='/messages' element={<RequireLogin><Layout><MessagesPage /></Layout></RequireLogin>}/>
+        <Route path='/message/:id' element={<RequireLogin><Layout><ChatPage /></Layout></RequireLogin>}/>
         <Route path='/search' element={<Layout><SearchPage /></Layout>}/>
         <Route path="/login" element={<Layout><LoginPage /></Layout>} />
         <Route path="/create" element={<RequireLogin><Layout><CreatePost /></Layout></RequireLogin>} />

@@ -17,8 +17,6 @@ import {
 } from "../redux/slice/posts";
 import {selectUserState} from "../redux/slice/users";
 import {CreatePost} from "./CreatePost";
-import * as clientConfig from '../clientConfig.json';
-const {baseUrl} = clientConfig;
 import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import {DotsIcon} from "./icons/Dots";
@@ -86,7 +84,15 @@ export const Post: React.FC<{id?: string, authorId?: string, showReplies?: boole
     }
   }, [post, authData])
 
-  return ( author ? <div className={style.PostContainer}>
+  if (author && post && post.repostOf) {
+    return <blockquote style={{paddingTop: 0}}>
+      <span style={{paddingRight: '0.5rem', fontSize: '0.8em', lineHeight: '0.7'}}>{author.username} reposted</span>
+      <RepostIcon width='16px' height='16px' style={{verticalAlign: 'middle'}} />
+      <Post id={post.repostOf} />
+    </blockquote>
+  }
+
+  return ( post && author ? <div className={style.PostContainer}>
       <div className={style['PostContainer__avatar-container']}>
         <Link to={`/user/${author.username}`}>
           <Avatar username={author?.username} imageId={author?.imageId || ''} height={'48px'} width={'48px'}/>
@@ -114,7 +120,7 @@ export const Post: React.FC<{id?: string, authorId?: string, showReplies?: boole
             const reUser = part.match(/(?<=\s@)[\S+]*/)
             if (reUser) {
               console.log(reUser[0]);
-              return <Link to={`${baseUrl}static/image/${reUser[0]}`} key={i}>{part}</Link>
+              return <Link to={`${process.env.BACKEND_URL}static/image/${reUser[0]}`} key={i}>{part}</Link>
             }
             const reUrl = part.match(/\bhttp(s)?:\/\/\S+/);
             if (reUrl) {
@@ -126,7 +132,7 @@ export const Post: React.FC<{id?: string, authorId?: string, showReplies?: boole
         {post?.imageId && (<div onClick={onClickNavigateToPost} className={style["PostContainer__content-attachment"]}>
           <img
             className={style["PostContainer__content-attachment-image"]}
-            src={`${baseUrl}/static/image/${post?.imageId}`}
+            src={`${process.env.BACKEND_URL}/static/image/${post?.imageId}`}
             alt={post?.text}
           />
         </div>)}
@@ -155,7 +161,7 @@ export const Post: React.FC<{id?: string, authorId?: string, showReplies?: boole
 
 export const Avatar: React.FC<{username: string, imageId?: string, width?: string, height?: string}> = ({username, imageId, width, height}) => {
   const src = imageId
-    ? `${baseUrl}/static/image/${imageId}`
+    ? `${process.env.BACKEND_URL}/static/image/${imageId}`
     : `data:image/svg+xml;utf8,${encodeURIComponent(jdenticon.toSvg(username || 'username', 48))}`
   return <img
     className={style.Avatar}
