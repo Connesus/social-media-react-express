@@ -105,7 +105,7 @@ PostSchema.statics.deletePostById =
 
 PostSchema.methods.populateUserActions =  async function(userId?: mongoose.Types.ObjectId) {
     if (userId) {
-        const hasReposted = await this.model('posts').exists({repostOf: this._id, user: userId});
+        const hasReposted = await Post.exists({repostOf: this._id, user: userId});
         const hasLiked = await Like.exists({postId: this._id, userId: userId});
         await this.set({hasLiked});
         await this.set({hasReposted});

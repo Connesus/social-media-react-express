@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const {
-    PORT = 8081,
+    PORT = 5000,
     MONGO_URI = 'mongodb://localhost:',
     MONGO_PORT = 27017,
     SESS_NAME = 'sid',
