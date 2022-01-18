@@ -1,5 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require("path");
+const Dotenv = require('dotenv-webpack');
 
 module.exports = {
   entry: "./src/index.tsx",
@@ -54,7 +55,7 @@ module.exports = {
         bypass: function(req, res, opt){
           //your custom code to check for any exceptions
           //console.log('bypass check', {req: req, res:res, opt: opt});
-          if(req.path.indexOf('/img/') !== -1 || req.path.indexOf('/public/') !== -1){
+          if(req.path.indexOf('/img/') !== -1 || req.path.indexOf('/src/') !== -1){
             return '/'
           }
 
@@ -65,9 +66,14 @@ module.exports = {
       }
     }
   },
-  plugins: [new HtmlWebpackPlugin({
-    template: "public/index.html",
+  plugins: [
+      new HtmlWebpackPlugin({
     hash: true, // For cache busting
-    filename: '../dist/index.html'
-  })]
+    filename: '../dist/index.html',
+    title: process.env.TITLE,
+    template: "src/index.html",
+    favicon: "src/favicon.ico"
+      }),
+    new Dotenv({systemvars: true})
+  ]
 }
