@@ -4,3 +4,4 @@ dist
 mongodbdata
 .env
 .idea
+certbot/*
