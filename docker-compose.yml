@@ -1,3 +1,4 @@
+version: "3"
 services:
     client:
      build:
@@ -31,7 +32,7 @@ services:
         # 30 Days 30 * 1000 * 60 * 60 * 24
         SESS_LIFETIME: 2592000000
       ports:
-      - 5000:5000
+      - 127.0.0.1:5000:5000
       volumes:
         - ./src/server:/home/node/app/server
         - /home/node/app/server/node_modules/
@@ -44,9 +45,7 @@ services:
       expose:
         - 27017
       ports:
-        - 27017:27017
-      logging:
-        driver: "none"
+        - 127.0.0.1:27017:27017
     nginx:
       image: nginx:latest
       ports:
