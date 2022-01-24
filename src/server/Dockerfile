@@ -33,5 +33,7 @@ RUN npm i
 EXPOSE $PORT
 
 #RUN chown -R node:node "/home/node/app/"
+RUN npm run build
 RUN chown -R node:node "/root/.npm/"
+RUN chown -R node:node "/home/node/"
 USER node
