@@ -9,11 +9,10 @@ These instructions will get you a copy of the project up and running on your loc
 ### Built With
 
 * Client:
-    * Typescript, React, React-router, Redux with Redux Toolkit, Redux-Saga, Socket.IO, SCSS Modules   
-    
+    * Typescript, React, React-router, Redux with Redux Toolkit,
+     Redux-Saga, Socket.IO, SCSS Modules   
 * Server:
     * Typescript, Express, Mongoose, MongoDB, bcrypt, Socket.IO
-    
 * Other: Docker, Docker Compose, Nginx
 
 ### Key Features
