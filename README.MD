@@ -2,9 +2,9 @@
 
 Social media full-stack webapp built with Typescript, React, Express & MongoDB 
 
-## Getting Started
+## About
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+TODO: Write software description here <-
 
 ### Built With
 
@@ -24,58 +24,41 @@ These instructions will get you a copy of the project up and running on your loc
 * Realtime direct messages with Websockets
 * Simple post search
 
+### Screenshots / Images
+
+TODO: Add images here <-
+
+### Network setup
+
+TODO: Add scheme image here <-
+
+## Getting Started
+
 ### Prerequisites
 
-The things you need before installing the software.
+The things you need before running the software:
 
 * Docker
 * Docker Compose
 
-### Installation
+### Local Deployment
 
-A step by step guide that will tell you how to get the development environment up and running.
-
-```
-$ First step
-$ Another step
-$ Final step
-```
-
-## Usage
-
-A few examples of useful commands and/or tasks.
+To deploy on local machine use this command:
 
 ```
-$ First example
-$ Second example
-$ And keep this in mind
+$ docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
 ```
 
-## Deployment
 
-Additional notes on how to deploy this on a live or release system. Explaining the most important branches, what pipelines they trigger and how to update the database (if anything special).
+###  Deployment
 
-### Server
+* Follow this [article](https://archive.is/nuyBs) to set up SSL certificates.
 
-* Live:
-* Release:
-* Development:
+* Look through docker compose config and change up environment variables to suit your website.
 
-### Branches
+* Run this command to deploy:
 
-* Master:
-* Feature:
-* Bugfix:
-* etc...
+```
+$ docker-compose up -d --build
+```
 
-## Additional Documentation and Acknowledgments
-
-* Project folder on server:
-* Confluence link:
-* Asana board:
-* etc...
-
-docker-compose up -V --build --abort-on-container-exit --always-recreate-deps
-SSL Setup reference
-
-https://archive.is/nuyBs
