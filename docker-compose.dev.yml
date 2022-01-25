@@ -1,0 +1,13 @@
+version: "3"
+services:
+  client:
+    build:
+      dockerfile: ./client/Dockerfile
+      context: ./src
+      args:
+        TITLE: DEVELOPMENT
+        BACKEND_API_URL: http://localhost/api
+        BACKEND_URL: http://localhost
+  nginx:
+    volumes:
+      - ./src/nginx/devconf/:/etc/nginx/conf.d/:ro
