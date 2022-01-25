@@ -1,6 +1,6 @@
 #  social-media-react-express
 
-Social media full-stack web app built with Typescript, React, Express & MongoDB 
+Social media full-stack webapp built with Typescript, React, Express & MongoDB 
 
 ## Getting Started
 
@@ -8,21 +8,12 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Built With
 
-* On the client
-    * Typescript
-    * React
-    * React-router
-    * Redux with Redux Toolkit
-    * Redux-Saga
-    * Socket.IO
-    * SCSS Modules   
-* Server
-    * Typescript
-    * Express
-    * Mongoose
-    * MongoDB
-    * bcrypt (Password encryption)
-    * Socket.IO
+* Client:
+    * Typescript, React, React-router, Redux with Redux Toolkit, Redux-Saga, Socket.IO, SCSS Modules   
+    
+* Server:
+    * Typescript, Express, Mongoose, MongoDB, bcrypt, Socket.IO
+    
 * Other: Docker, Docker Compose, Nginx
 
 ### Key Features
