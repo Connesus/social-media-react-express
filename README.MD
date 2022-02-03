@@ -23,6 +23,7 @@ TODO: Write software description here <-
 * Ability to make a repost
 * Realtime direct messages with Websockets
 * Simple post search
+* Post feed page
 
 ### Screenshots / Images
 
