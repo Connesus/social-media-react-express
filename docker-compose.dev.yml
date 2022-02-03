@@ -1,13 +1,22 @@
 version: "3"
 services:
   client:
+    ports:
+      - 3000:3000
     build:
-      dockerfile: ./client/Dockerfile
+      dockerfile: ./client/Dev.Dockerfile
       context: ./src
       args:
         TITLE: DEVELOPMENT
-        BACKEND_API_URL: http://localhost/api
-        BACKEND_URL: http://localhost
+        BACKEND_API_URL: http://localhost:5000/api
+        BACKEND_URL: http://localhost:5000
+  server:
+    command: npm run dev
   nginx:
+    profiles:
+      - donotstart
     volumes:
       - ./src/nginx/devconf/:/etc/nginx/conf.d/:ro
+  certbot:
+    profiles:
+      - donotstart

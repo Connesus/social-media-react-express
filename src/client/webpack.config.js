@@ -44,7 +44,8 @@ module.exports = {
     extensions: ['.ts', '.js', '.json', ".tsx", ".scss", 'css']
   },
   devServer: {
-    port: 8000,
+    port: 3000,
+    allowedHosts: 'all',
     open: true,
     hot: true,
     historyApiFallback: true,
@@ -52,7 +53,7 @@ module.exports = {
       '/**': {  //catch all requests
         target: '/index.html',  //default target
         secure: false,
-        bypass: function(req, res, opt){
+        bypass: function(req, _res, _opt){
           //your custom code to check for any exceptions
           //console.log('bypass check', {req: req, res:res, opt: opt});
           if(req.path.indexOf('/img/') !== -1 || req.path.indexOf('/src/') !== -1){
