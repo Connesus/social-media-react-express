@@ -23,16 +23,16 @@ export const SideNavbar: React.FC = () => {
       </NavLink>) : (<NavLink to={'/login'} className={navLinkClass} style={{color: 'blue'}}>Login</NavLink>)
       }
       <NavLink to="/" className={navLinkClass}>
-        <HomeIcon width='48px' height='48px' />
+        <HomeIcon className={style['SideNavbar__link-icon']} />
       </NavLink>
       <NavLink to="/search" className={navLinkClass}>
-        <SearchIcon width='48px' height='48px' />
+        <SearchIcon className={style['SideNavbar__link-icon']} />
       </NavLink>
       <NavLink to="/create" className={navLinkClass}>
-        <PostIcon width='48px' height='48px' />
+        <PostIcon className={style['SideNavbar__link-icon']} />
       </NavLink>
       <NavLink to="/messages" className={navLinkClass} >
-        <MessageIcon width='48px' height='48px' />
+        <MessageIcon className={style['SideNavbar__link-icon']} />
       </NavLink>
     </nav>
   );

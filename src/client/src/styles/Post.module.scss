@@ -1,13 +1,16 @@
+@use 'mixins/colors';
+
 .PostContainer {
   display: flex;
   padding: 12px 16px 12px 16px;
-  border: 1px solid lightgrey;
   width: 100%;
   //min-width: 100%;
   //min-width: 400px;
   //max-width: 600px;
   //min-height: 0;
   gap: 16px;
+  //font-size: 1.6rem;
+  box-shadow: colors.$shadow-2;
 
   &__avatar-container {
     //width: 96px;

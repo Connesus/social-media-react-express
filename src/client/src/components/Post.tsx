@@ -21,6 +21,7 @@ import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 import {DotsIcon} from "./icons/Dots";
 import {PostReplies} from "./PostReplies";
+import {Button} from "./Button";
 
 const formatPostDate = (date: Date) => `${date.getDay()}.${date.getMonth()}.${date.getFullYear()}`;
 
@@ -112,7 +113,7 @@ export const Post: React.FC<{id?: string, authorId?: string, showReplies?: boole
                 </div>}
               position="bottom right"
             >
-                <button onClick={handleDeletePostButton}>Delete Post</button>
+                <Button onClick={handleDeletePostButton}>Delete Post</Button>
             </Popup>}
           </div>
         <div onClick={onClickNavigateToPost} className={style["PostContainer__content-text"]}>
@@ -138,10 +139,10 @@ export const Post: React.FC<{id?: string, authorId?: string, showReplies?: boole
         </div>)}
         <div className={style["PostContainer__content-interaction"]}>
 
-          <button onClick={handleReplyButton} className={style["PostContainer__content-interaction-reply"]}>
+          <Button onClick={handleReplyButton} className={style["PostContainer__content-interaction-reply"]}>
             <CommentIcon color='black' width='20px' height='20px'/>
             <span>{post?.replyCount}</span>
-          </button>
+          </Button>
 
           <button onClick={handleRepostButton} className={style["PostContainer__content-interaction-repost"]}>
               <RepostIcon width='24px' height='24px' color={post?.hasReposted ? 'blue' : 'black'}/>

@@ -16,11 +16,13 @@ export const Layout: React.FC = (props: { children?: React.ReactNode }) => {
   }, [userId])
 
   return (
-    <main className={style.Layout}>
-      <SideNavbar />
-      <div className={style.Layout__content}>
-        {props.children}
+    <div className={style["Page-container"]}>
+      <div className={style.LayoutWrap}>
+        <SideNavbar />
+        <main className={style.Layout}>
+            {props.children}
+        </main>
       </div>
-    </main>
+    </div>
   );
 };
