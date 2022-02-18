@@ -5,6 +5,7 @@ import {Post} from "./Post";
 import {useCallback, useEffect, useState} from "react";
 import styles from '../styles/Feed.module.scss';
 import {fetchMoreFeedPosts, selectFeedIds} from "../redux/slice/posts";
+import {Button} from "./Button";
 
 export const Feed: React.FC = () => {
   const dispatch = useDispatch();
@@ -24,7 +25,7 @@ export const Feed: React.FC = () => {
   return (
       <div className={styles.Feed}>
         {feedPostIds.map((postId) => <Post id={postId} key={postId} />)}
-        <button onClick={handleLoadMoreButton}>LOAD MORE</button>
+        <Button onClick={handleLoadMoreButton}>LOAD MORE</Button>
       </div>
   );
 };

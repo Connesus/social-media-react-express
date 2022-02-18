@@ -4,50 +4,17 @@
   margin: auto;
   height: 100vh;
   overflow: scroll;
+  padding-top: 50px;
 }
 
 .LayoutWrap {
-  max-width: 900px;
-  margin: 0 auto;
+  width: min(90%, 900px);
+  margin-inline: auto;
+  //margin: 0 auto;
   position: relative;
-  width: auto;
   float: none;
 }
 
 .Layout {
-  //width: 100vw;
-  //height: 100vh;
-  //
-  //display: flex;
-  //
-  //overflow: auto;
-  //padding: 0 16px 0 16px;
-  //justify-content: center;
-  //max-height: 100vh;
   padding: 0 1vw 0 1vw;
-
-  //flex: 1;
-  display: inline-block;
-  //justify-content: center;
-  //overflow-y: scroll;
-  //width: 900px;
-  max-width: 90%;
-  min-width: 320px;
-  position: relative;
-  float: right;
-
-  &__content {
-    padding: 0 1vw 0 1vw;
-    flex: 1;
-    max-width: 900px;
-    //flex: 0.5;
-    //overflow: auto;
-    //display: flex;
-    //gap: 2vw;
-    //justify-content: center;
-    //word-wrap: break-word;
-    //white-space: pre-wrap;
-    //word-break: break-word;
-    //min-width: 600px;
-  }
 }
