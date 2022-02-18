@@ -1,7 +1,28 @@
+@use "mixins/colors";
+
 .Button {
   display: flex;
   align-items: center;
   line-height: 1;
-  gap: 12px;
-  background: oldlace;
+  gap: 0.5rem;
+  //background: oldlace;
+  padding: 0.25rem 0.5rem;
+  background: colors.$white;
+  border: none;
+  border-radius: 10px;
+  color: colors.$black;
+  font-weight: bold;
+  justify-content: center;
+
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 0px 5px;
+
+  &:hover {
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    transition: 100ms ease-in;
+  }
+  //border: solid 2px colors.$gradient-3;
+  //border-width: 4px;
+  //border-style: solid;
+  //border-image: colors.$gradient-3 1;
+  //border-radius: 50px;
 }
