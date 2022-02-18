@@ -1,9 +1,18 @@
-html {
-  width: 100vw;
+:root {
+  --step--2: clamp(0.78rem, 0.71rem + 0.35vw, 0.96rem);
+  --step--1: clamp(0.94rem, 0.84rem + 0.51vw, 1.20rem);
+  --step-0: clamp(1.13rem, 0.98rem + 0.73vw, 1.50rem);
+  --step-1: clamp(1.35rem, 1.15rem + 1.02vw, 1.88rem);
+  --step-2: clamp(1.62rem, 1.34rem + 1.41vw, 2.34rem);
+  --step-3: clamp(1.94rem, 1.56rem + 1.92vw, 2.93rem);
 }
 
 html, body {
+  width: 100vw;
   height: 100%;
-  //font-size: 62.5%;
-  font-size: 18px;
+  //font-size: 18px;
+}
+
+a {
+  font-size: var(--step-0);
 }
