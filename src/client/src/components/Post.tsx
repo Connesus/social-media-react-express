@@ -1,4 +1,4 @@
-import React, {useCallback} from "react"
+import React, {CSSProperties, useCallback} from "react"
 import style from '../styles/Post.module.scss';
 import {Link, useNavigate} from "react-router-dom";
 import jdenticon from "jdenticon/standalone";
@@ -140,19 +140,19 @@ export const Post: React.FC<{id?: string, authorId?: string, showReplies?: boole
         <div className={style["PostContainer__content-interaction"]}>
 
           <Button onClick={handleReplyButton} className={style["PostContainer__content-interaction-reply"]}>
-            <CommentIcon color='black' width='20px' height='20px'/>
+            <CommentIcon color='black' width='18px' height='18px'/>
             <span>{post?.replyCount}</span>
           </Button>
 
-          <button onClick={handleRepostButton} className={style["PostContainer__content-interaction-repost"]}>
-              <RepostIcon width='24px' height='24px' color={post?.hasReposted ? 'blue' : 'black'}/>
+          <Button onClick={handleRepostButton} className={style["PostContainer__content-interaction-repost"]}>
+              <RepostIcon width='18px' height='18px' color={post?.hasReposted ? 'blue' : 'black'}/>
               <span>{post?.repostCount}</span>
-          </button>
+          </Button>
 
-          <button onClick={handleLikeButton} className={style["PostContainer__content-interaction-like"]}>
-            <LikeIcon width='20px' height='20px' color={post?.hasLiked ? 'red' : 'black'}/>
+          <Button onClick={handleLikeButton} className={style["PostContainer__content-interaction-like"]}>
+            <LikeIcon width='18px' height='18px' color={post?.hasLiked ? 'red' : 'black'}/>
             <span>{post?.likeCount}</span>
-          </button>
+          </Button>
         </div>
         {showCreateReply && <CreatePost replyTo={id} />}
         {(showReplies && id && <PostReplies postId={id} />)}
@@ -160,7 +160,9 @@ export const Post: React.FC<{id?: string, authorId?: string, showReplies?: boole
     </div> : <><h3>Loading</h3></>);
 });
 
-export const Avatar: React.FC<{username: string, imageId?: string, width?: string, height?: string}> = ({username, imageId, width, height}) => {
+export const Avatar: React.FC<
+  {username: string, imageId?: string, width?: string, height?: string, inlineStyle?: CSSProperties}
+  > = ({username, imageId, width, height, inlineStyle}) => {
   const src = imageId
     ? `${process.env.BACKEND_URL}/static/image/${imageId}`
     : `data:image/svg+xml;utf8,${encodeURIComponent(jdenticon.toSvg(username || 'username', 48))}`
@@ -171,4 +173,5 @@ export const Avatar: React.FC<{username: string, imageId?: string, width?: strin
     width={width || undefined}
     height={height || undefined}
     hidden={undefined}
+    style={inlineStyle || undefined}
   />}
