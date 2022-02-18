@@ -133,8 +133,8 @@ io.on('connection', async (socket) =>  {
                 ttl: parseInt(SESS_LIFETIME as string) / 1000, // 1 Day
             }),
             cookie: {
-                sameSite: "none",
-                secure: true,
+                sameSite: NODE_ENV !== 'development',
+                secure: NODE_ENV !== 'development',
                 maxAge: parseInt(SESS_LIFETIME as string),
                 path: '/',
                 httpOnly: false,
