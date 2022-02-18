@@ -34,7 +34,7 @@ services:
       ports:
       - 127.0.0.1:5000:5000
       volumes:
-        - ./src/server:/home/node/app/server
+        #- ./src/server:/home/node/app/server
         - /home/node/app/server/node_modules/
       depends_on:
         - database
