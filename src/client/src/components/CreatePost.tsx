@@ -1,6 +1,8 @@
 import React, {FormEvent, SyntheticEvent, useCallback, useRef} from "react";
 import {useDispatch} from "react-redux";
 import {createPostAction} from "../redux/slice/posts";
+import {Button} from "./Button";
+import styles from '../styles/CreatePost.module.scss';
 
 export const CreatePost: React.FC<{replyTo?: string}> = ({replyTo}) => {
   const dispatch = useDispatch();
@@ -33,10 +35,13 @@ export const CreatePost: React.FC<{replyTo?: string}> = ({replyTo}) => {
   },[postTextRef, postFileRef]);
 
   return (
-    <form onSubmit={handleCreatePost}>
-      <textarea name={'text'} placeholder="Post text..."  ref={postTextRef} />
-      <input type={"file"} name={'file'} placeholder="Upload your file" ref={postFileRef}/>
-      <button type={"submit"}>Create Post</button>
+    <form onSubmit={handleCreatePost} className={styles.CreatePost}>
+      <textarea name={'text'} placeholder="Post text..."  ref={postTextRef} className={styles.CreatePost__textarea} />
+      <div className={styles['CreatePost__buttons-container']}>
+        <label className={styles['CreatePost__file-label']}>Upload Image<input type={"file"} name={'file'} placeholder="Upload your file" ref={postFileRef}  className={styles.CreatePost__file}/>
+        </label>
+        <Button type={"submit"} className={styles.CreatePost__button}>Create Post</Button>
+      </div>
     </form>
   )
 }

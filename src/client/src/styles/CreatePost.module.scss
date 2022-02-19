@@ -1,0 +1,29 @@
+@use "Button.module.scss";
+
+.CreatePost {
+  padding-top: 2em;
+
+  &__textarea {
+    height: 200px;
+    width: 100%;
+
+    resize: vertical;
+  }
+
+  &__buttons-container {
+    display: flex;
+    gap: 1em;
+  }
+
+  &__file {
+    display: none;
+    &-label {
+      @extend .Button;
+      padding: clamp(0.5em, 1em, 2em) clamp(0.5em, 1em, 2em);
+    }
+  }
+
+  &__button {
+    flex-grow: 1;
+  }
+}
