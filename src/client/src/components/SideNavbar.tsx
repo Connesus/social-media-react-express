@@ -13,13 +13,10 @@ const navLinkClass = ({isActive}: {isActive: boolean}): string => [style.SideNav
   ...(isActive ? [style['SideNavbar__link--active']] : [])].join(' ');
 
 const iconClassFn = (match: PathMatch | null) => {
-  console.log('match',!!match)
-  console.log('')
   const res = [
     style['SideNavbar__link-icon'],
     ...(!!match ? [style['SideNavbar__link-icon--active']] : [])
   ].join(' ');
-  console.log(res)
   return res
 }
 

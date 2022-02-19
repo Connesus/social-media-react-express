@@ -3,6 +3,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {RootState} from "../redux/store";
 import {searchPosts} from "../redux/slice/posts";
 import {Post} from "./Post";
+import {Button} from "./Button";
 
 export const SearchPage: React.FC = () => {
   const searchIds = useSelector((state: RootState) => state.post.searchIds);
@@ -19,7 +20,7 @@ export const SearchPage: React.FC = () => {
     <div>
       <div>
         <textarea ref={postTextRef} placeholder='Enter post text'></textarea>
-        <button onClick={handleSearchButton}>Search</button>
+        <Button onClick={handleSearchButton}>Search</Button>
       </div>
       <div>
         {searchIds && searchIds.map(id => <Post id={id} />)}
