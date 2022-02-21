@@ -14,6 +14,8 @@ services:
     environment:
       - NODE_ENV=development
     command: npm run dev
+    volumes:
+    - ./src/server:/home/node/app/server
   nginx:
     profiles:
       - donotstart
