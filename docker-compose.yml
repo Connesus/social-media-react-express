@@ -16,6 +16,7 @@ services:
        - /home/node/app/client/node_modules/
      depends_on:
        - server
+     restart: always
     server:
       build:
         dockerfile: ./server/Dockerfile
@@ -38,6 +39,7 @@ services:
         - /home/node/app/server/node_modules/
       depends_on:
         - database
+      restart: always
     database:
       image: mongo
       volumes:
@@ -46,6 +48,7 @@ services:
         - 27017
       ports:
         - 127.0.0.1:27017:27017
+      restart: always
     nginx:
       image: nginx:latest
       ports:
@@ -64,3 +67,4 @@ services:
       volumes:
         - ./src/certbot/www/:/var/www/certbot/:rw
         - ./src/certbot/conf/:/etc/letsencrypt/:rw
+      restart: always
