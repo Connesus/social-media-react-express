@@ -4,7 +4,7 @@ Social media full-stack webapp built with Typescript, React, Express & MongoDB
 
 ## About
 
-TODO: Write software description here <-
+This is a social media app written in TS with Express, MongoDB on the backend & with React, Redux and Redux-saga on the client. Uses Websockets for instant messaging. Deployed with Docker & Nginx 
 
 ### Built With
 
