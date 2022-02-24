@@ -107,7 +107,7 @@ io.on('connection', async (socket) =>  {
 
         app.disable('x-powered-by');
         app.use(express.json());
-        app.use(express.urlencoded({ extended: true, limit: '5mb' }));
+        app.use(express.urlencoded({ extended: true, limit: '5MB' }));
 
         app.use((req, res, next) => {
             res.setHeader("Access-Control-Allow-Origin", "*");
