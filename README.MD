@@ -31,7 +31,7 @@ TODO: Add images here <-
 
 ### Network setup
 
-TODO: Add scheme image here <-
+![Network setup](https://github.com/fdr-smnv/social-media-react-express/blob/master/docs/network.jpeg?raw=true)
 
 ## Getting Started
 
