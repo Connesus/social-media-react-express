@@ -11,5 +11,8 @@
   "license": "ISC",
   "workspaces": [
     "src/*"
-  ]
+  ],
+  "devDependencies": {
+    "eslint-config-prettier": "8.5.0"
+  }
 }

@@ -1,12 +1,10 @@
-import bcrypt from 'bcrypt';
-import mongoose, {Document, Model, Types} from "mongoose";
-import {IUserDoc} from "./user.js";
-
-
+import bcrypt from "bcrypt";
+import mongoose, { Document, Model, Types } from "mongoose";
+import { IUserDoc } from "./user.js";
 
 interface IAuthentication {
   secret: string;
-  user: IUserDoc['_id']
+  user: IUserDoc["_id"];
 }
 
 interface IAuthenticationDoc extends IAuthentication, Document<Types.ObjectId> {
@@ -14,27 +12,35 @@ interface IAuthenticationDoc extends IAuthentication, Document<Types.ObjectId> {
   hashAndSetPassword(password: string): void;
 }
 
-export interface IAuthenticationModel extends Model<IAuthenticationDoc> {}
+export type IAuthenticationModel = Model<IAuthenticationDoc>;
 
-const AuthenticationSchema = new mongoose.Schema<IAuthenticationDoc, IAuthenticationModel>({
+const AuthenticationSchema = new mongoose.Schema<
+  IAuthenticationDoc,
+  IAuthenticationModel
+>({
   secret: {
     type: String,
-    required: true
+    required: true,
   },
   user: {
     type: mongoose.SchemaTypes.ObjectId,
-    ref: 'users',
+    ref: "users",
     required: true,
-    unique: true
-  }
+    unique: true,
+  },
 });
 
-AuthenticationSchema.methods.verifyPassword = function(password:string) {
+AuthenticationSchema.methods.verifyPassword = function (password: string) {
   return bcrypt.compare(password, this.secret);
-}
+};
 
-AuthenticationSchema.methods.hashAndSetPassword = async function(password:string) {
-  this.set('secret', await bcrypt.hash(password, 10));
-}
+AuthenticationSchema.methods.hashAndSetPassword = async function (
+  password: string
+) {
+  this.set("secret", await bcrypt.hash(password, 10));
+};
 
-export const Authentication = mongoose.model<IAuthenticationDoc, IAuthenticationModel>('authentications', AuthenticationSchema, 'authentications');
+export const Authentication = mongoose.model<
+  IAuthenticationDoc,
+  IAuthenticationModel
+>("authentications", AuthenticationSchema, "authentications");

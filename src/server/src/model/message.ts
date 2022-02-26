@@ -1,44 +1,46 @@
-import mongoose, {Document, Model, Types} from "mongoose";
-import {IUserDoc} from "./user.js";
+import mongoose, { Document, Model, Types } from "mongoose";
+import { IUserDoc } from "./user.js";
 const { model, Schema } = mongoose;
-
 
 export interface IMessage {
   sender: IUserDoc["_id"];
   receiver: IUserDoc["_id"];
   text: string;
   createdAt: Date;
-  seen?: Boolean;
+  seen?: boolean;
 }
 
 export interface IMessageDoc extends IMessage, Document<Types.ObjectId> {}
-export interface IMessageModel extends Model<IMessageDoc> {}
-
+export type IMessageModel = Model<IMessageDoc>;
 
 const MessageSchema = new Schema<IMessageDoc, IMessageModel>({
   sender: {
     type: mongoose.Types.ObjectId,
-    ref: 'users',
-    required: true
+    ref: "users",
+    required: true,
   },
   receiver: {
     type: mongoose.Types.ObjectId,
-    ref: 'users',
-    required: true
+    ref: "users",
+    required: true,
   },
   text: {
     type: String,
-    required: true
+    required: true,
   },
   createdAt: {
     type: Date,
     required: true,
-    default: () => new Date()
+    default: () => new Date(),
   },
-  seen: Boolean
-})
+  seen: Boolean,
+});
 
-MessageSchema.index({sender: 1, receiver: 1, createdAt: -1 });
-MessageSchema.index({receiver: 1, sender: 1, createdAt: -1 });
+MessageSchema.index({ sender: 1, receiver: 1, createdAt: -1 });
+MessageSchema.index({ receiver: 1, sender: 1, createdAt: -1 });
 
-export const Message = model<IMessageDoc, IMessageModel>('messages', MessageSchema, 'messages');
+export const Message = model<IMessageDoc, IMessageModel>(
+  "messages",
+  MessageSchema,
+  "messages"
+);

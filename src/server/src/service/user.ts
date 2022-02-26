@@ -1,22 +1,18 @@
-import {IUser,User} from "../model/user.js";
-import {UserLoginDataT} from "@shared/types";
+import { IUser, User } from "../model/user.js";
 import mongoose from "mongoose";
-
-
 
 export class UserService {
   static async getUsersById(ids: mongoose.Types.ObjectId[]) {
-    return await User.find({_id: {$in: ids}});
+    return await User.find({ _id: { $in: ids } });
   }
 
   static async getUserByUsername(username: string) {
-    return await User.findOne({'username': username})
-      .catch((error: Error) => {
-        console.error(error);
-        return error;
-      });
+    return await User.findOne({ username: username }).catch((error: Error) => {
+      console.error(error);
+      return error;
+    });
   }
-  static async createUser (userData: IUser) {
+  static async createUser(userData: IUser) {
     return await User.create(userData);
   }
   // static generateUserLoginFilter (login: UserLoginDataT['login']) {

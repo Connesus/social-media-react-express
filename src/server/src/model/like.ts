@@ -17,32 +17,32 @@
 //
 // export const LikeModel = model<ILike>('Like', likeSchema);
 
-import mongoose, {Document, Model, Types} from "mongoose";
-import {IPostDoc} from "./post.js";
-import {IUserDoc} from "./user.js";
+import mongoose, { Document, Model, Types } from "mongoose";
+import { IPostDoc } from "./post.js";
+import { IUserDoc } from "./user.js";
 const { model, Schema } = mongoose;
 
 export interface ILike {
-    postId: IPostDoc['_id'];
-    userId: IUserDoc['_id'];
+  postId: IPostDoc["_id"];
+  userId: IUserDoc["_id"];
 }
 
 export interface ILikeDoc extends ILike, Document<Types.ObjectId> {}
-export interface ILkeModel extends Model<ILikeDoc> {}
+export type ILkeModel = Model<ILikeDoc>;
 
 const LikeSchema = new Schema<ILikeDoc>({
-    postId: {
-        type: mongoose.Types.ObjectId,
-        ref: 'posts',
-        required: true
-    },
-    userId: {
-        type: mongoose.Types.ObjectId,
-        ref: 'users',
-        required: true
-    },
-})
+  postId: {
+    type: mongoose.Types.ObjectId,
+    ref: "posts",
+    required: true,
+  },
+  userId: {
+    type: mongoose.Types.ObjectId,
+    ref: "users",
+    required: true,
+  },
+});
 
-LikeSchema.index({postId: 1});
+LikeSchema.index({ postId: 1 });
 
-export const Like = model<ILikeDoc, ILkeModel>('likes', LikeSchema, 'likes');
+export const Like = model<ILikeDoc, ILkeModel>("likes", LikeSchema, "likes");
